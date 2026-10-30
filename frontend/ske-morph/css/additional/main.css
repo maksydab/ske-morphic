@@ -1,0 +1,39 @@
+.sick_back {
+  background: url("/assets/background.png") no-repeat;
+  background-size: cover;
+}
+main.sick_back {
+  position: relative;
+  min-height: 100vh;
+}
+
+.bg-credit {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  margin: 0;
+  z-index: 1;
+}
+.pointer:hover{
+  cursor: pointer;
+}
+.no-decor{
+  text-decoration: none;
+  color:var(--main);
+}
+.error-img {
+  width: 10%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+.wrap{
+  text-wrap-mode: wrap;
+}
+.barny-img {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  min-height: 200px;
+  object-fit: cover;
+  flex-shrink: 0;
+}

@@ -1,0 +1,10 @@
+.ske-form{
+  display: flex;
+  flex-direction: column;
+  max-width: 380px;
+  margin: var(--uni-padding);
+  padding: var(--uni-padding);
+}
+.ske-form label + input {
+  margin-bottom: 10px;
+}

@@ -1,0 +1,20 @@
+.inp{
+  background-color: var(--bg);
+  border: 1px solid var(--trenary);
+  color: var(--main);
+  padding:var(--uni-padding);
+  border-radius: var(--roundness);
+}
+.inp:-webkit-autofill,
+.inp:-webkit-autofill:hover, 
+.inp:-webkit-autofill:focus, 
+.inp:-webkit-autofill:active{
+  -webkit-text-fill-color: var(--trenary);
+  -webkit-box-shadow: 0 0 0 30px var(--trenary) inset !important;
+  -webkit-text-fill-color: var(--bg) !important;
+}
+.inp:focus {
+  outline: 1px solid var(--trenary);
+  outline-offset: 1px;
+  border-color: var(--trenary);
+}

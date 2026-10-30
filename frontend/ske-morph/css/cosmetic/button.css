@@ -1,0 +1,27 @@
+.btn{
+  background-color: var(--bg-secondary);
+  color:var(--main);
+  padding:var(--uni-padding);
+  border: 1px solid var(--trenary);
+  border-radius: var(--roundness);
+  transition:ease 0.1s ;
+}
+.btn:hover{
+  cursor: pointer;
+  background-color: var(--trenary) ;
+  color: var(--bg);
+}
+.btn:active{
+  background-color: var(--bg-accent);
+  border-color: var(--bg-accent);
+  color: var(--main);
+}
+.btn:disabled{
+  border-color: var(--disabled);
+  color:var(--disabled);
+}
+.btn:disabled:hover{
+  cursor:not-allowed;
+  background-color: var(--bg-secondary) ;
+  color: var(--disabled);
+}

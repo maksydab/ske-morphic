@@ -1,0 +1,29 @@
+
+<link rel="stylesheet" href="/dist/bundle.css">
+<style>
+  .flexer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .error-img {
+      width: 150px;
+      aspect-ratio: 1;
+      object-fit: cover;
+  }
+
+  .error-page {
+      flex: 1;
+      min-width: 200px;
+  }
+</style>
+<main class="paddin bg-sec flex x-center"><h1>404 - Page not found</h1></main>
+<div class="flexer">
+  <img class="pix-img error-img" src="/assets/sam.png">
+  <div class="error-page paddin">
+      <p>Sorry, this page doesn't seem to exist</p>
+      <a href="/" class="link">Go home</a>
+  </div>
+</div>

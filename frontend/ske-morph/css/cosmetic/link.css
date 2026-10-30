@@ -1,0 +1,10 @@
+.link{
+  text-decoration: underline solid;
+  text-underline-offset: 4px;
+  color:var(--accent);
+  transition: all ease-in-out 0.1s;
+}
+.link:hover{
+  background-color: var(--accent);
+  color:var(--bg);
+}

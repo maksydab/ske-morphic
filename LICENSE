@@ -1,0 +1,29 @@
+LICENSE
+
+Copyright (c) 2026 maksydab. All rights reserved.
+
+Permission is hereby granted to modify, copy, use,
+and redistribute the source code contained within the frontend directory,
+provided that all redistributed copies, including modified versions,
+retain this copyright notice in a clearly visible and accessible location.
+Any modifications or derivative works based on the code within the frontend 
+directory may be distributed, provided that the original copyright notice 
+is preserved and the terms of this license are respected.
+Permission is granted to inspect, read, and view the source code contained within the backend and any other directories 
+outside of frontend for informational, educational, and review purposes only. 
+No permission is granted to copy,
+modify, adapt, redistribute, publish, sublicense,
+or otherwise distribute the backend source code, in whole or in part, 
+whether in its original or modified form. For the purposes of this license, the frontend directory is the only directory 
+explicitly covered by the permissions to modify, copy, and redistribute code.
+All files, directories, scripts, configurations, assets,
+and other materials located outside of the frontend directory are considered
+restricted unless explicitly stated otherwise in writing by the copyright holder.
+Access to or visibility of the source code does not imply permission to reuse, reproduce, or distribute it.
+All rights not expressly granted by this license are reserved by the copyright holder, maksydab.
+This license does not grant any additional rights to the backend code or any other restricted materials. 
+Any use beyond the permissions explicitly stated herein requires prior written authorization from the copyright holder. 
+The code is provided "as is", without warranties of any kind, express or implied, 
+including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement. 
+In no event shall the copyright holder be held liable for any claim, damages, or other liability arising 
+from the use of the permitted code or any other dealings with the software, to the extent permitted by applicable law.

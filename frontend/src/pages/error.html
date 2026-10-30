@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error</title>
+</head>
+<body>
+
+<link rel="stylesheet" href="/dist/bundle.css">
+<style>
+  .flexer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .error-img {
+      width: 150px;
+      aspect-ratio: 1;
+      object-fit: cover;
+  }
+
+  .error-page {
+      flex: 1;
+      min-width: 200px;
+  }
+</style>
+<main class="paddin bg-sec flex x-center"><h1>Internal error</h1></main>
+<div class="flexer">
+  <img class="pix-img error-img" src="/assets/sam_scared.png">
+  <div class="error-page paddin">
+      <p>Sorry, This seems to be an error on our part</p>
+      <pre class="wrap">{|error|}</pre>
+      <a href="/" class="link">Go home</a>
+  </div>
+</div>
+</body>
+</html>

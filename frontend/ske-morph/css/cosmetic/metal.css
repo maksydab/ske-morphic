@@ -1,0 +1,31 @@
+.metal {
+  position: relative;
+  background: #808080;
+  background: linear-gradient(0deg, var(--element-bg-h) 0%, var(--element-bg-h) 100%);
+  border: solid var(--element-bg-sec) 1px;
+  border-radius: 7px;
+  color: var(--main);
+  font-weight: 500;
+  text-shadow: 0px 2px 3px #fff;
+  padding: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.metal::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  pointer-events: none;
+  border-radius: 6px; 
+  background: 
+    linear-gradient(to right, #fff 100%, transparent 70%) top / 100% 1px no-repeat,
+    linear-gradient(to bottom, #fff 0%, transparent 100%) left / 1px 100% no-repeat,
+    linear-gradient(to bottom, #fff 0%, transparent 100%) right / 1px 100% no-repeat;
+  
+  transition: opacity 0.15s ease;
+  opacity: 0.8;
+}

@@ -1,0 +1,9 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(
+        var(--cols, auto-fit),
+        minmax(150px, 1fr)
+    );
+    grid-template-rows: var(--rows, auto);
+    gap: var(--gap, 10px);
+}

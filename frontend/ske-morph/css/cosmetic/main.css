@@ -1,0 +1,79 @@
+@import url("button.css");
+@import url("metal.css");
+@import url("link.css");
+@import url("input.css");
+@import url("ske-form.css");
+
+body {
+  background-color: var(--bg);
+  color: var(--main);
+  padding: 0;
+  margin: 0;
+}
+
+.bg-sec {
+  background-color: var(--bg-secondary);
+}
+
+.paddin {
+  padding: 4px;
+}
+
+.margin {
+  margin:4px;
+}
+.margin-8{
+  margin:8px;
+}
+.custom-sel::selection {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
+.no-overflow-x {
+  overflow-x: hidden;
+}
+
+.cont {
+  background-color: var(--bg-secondary);
+  padding: 8px;
+}
+
+/**:hover:not(html, body, main, section, div, header, footer) {
+  opacity: 0;
+}*/
+.flex {
+  display: flex;
+}
+
+.y-center {
+  align-items: center;
+}
+
+.x-center {
+  justify-content: center;
+}
+
+.nomarg {
+  margin: 0;
+}
+
+.pix-img {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+
+
+.col {
+  flex-direction: column;
+}
+
+.view-x {
+  width: 99vw;
+}
+
+.view-y {
+  height: 100vh;
+}

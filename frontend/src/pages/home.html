@@ -1,0 +1,26 @@
+{|include src/components/ui/Header.html|}
+<main class="flex y-center x-center view-x view-y sick_back pix-img">
+  <div class="cont" style="max-width: 500px; width: 100%;">
+    <div class="flex">
+      <h1 style="font-size: 50px; font-weight: 700;">
+        Make games Anywhere
+      </h1>
+      <img class="barny-img" src="/assets/barny.png">
+    </div>
+    <h2>Using simple visual systems</h2>
+    <h3>- No AI</h3>
+    <h3>- No spyware</h3>
+  </div>
+
+  <p class="bg-credit">
+    Background from <a class="link" href="https://github.com/jhuckaby/canvascycle" target="_blank">here</a>
+  </p>
+</main>
+<div class="paddin">
+  <h1>Featured discs:</h1>
+  <div class="flex">
+    {|for d in featured|}
+    {|include src/components/ui/Disc.html (d)|}
+    {|endfor|}
+  </div>
+</div>
