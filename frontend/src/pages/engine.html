@@ -1,0 +1,166 @@
+<style>
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 65vh;
+    background: #333;
+  }
+</style>
+
+
+<canvas id="glcanvas" tabindex="1"></canvas>
+
+<div class="editor">
+
+  <h2>SK Engine JSON Editor</h2>
+
+  <textarea id="json">{
+   "message":"hi",
+   "entities":{
+      "Bob":{
+         "components":[
+            {
+              "type":"renderer",
+              "p":{
+                "img":"121212333",
+                "size":{
+                  "x":3,
+                  "y":3
+                }
+              }
+            }
+         ]
+      }
+   },
+   "scene":[
+      {
+        "t":"Bob",
+        "p":{
+          "x":5.0,
+          "y":2.0,
+          "w":1.0,
+          "h":1.0
+        }
+      }
+   ]
+}
+</textarea>
+
+  <br>
+
+  <button id="loadbutton" disabled>
+    load json
+  </button>
+
+  <br>
+
+  <input type="file" id="fileinput" accept=".json,application/json">
+
+  <div id="status">loading the engine...</div>
+
+</div>
+
+<script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
+
+<script>
+  let ready = false;
+
+  const status = document.getElementById("status");
+  const button = document.getElementById("loadbutton");
+
+  miniquad_add_plugin({
+    register_plugin: function (importobject) { },
+
+    on_init: function () {
+      ready = true;
+
+      status.textContent = "engine ready!";
+      button.disabled = false;
+    }
+  });
+
+  function load_json_bytes(bytes) {
+    if (!ready) {
+      throw new Error("engine is not ready");
+    }
+
+    const ptr = wasm_exports.alloc_json(bytes.length);
+
+    if (ptr === 0) {
+      throw new Error("rust allocation failed");
+    }
+
+    try {
+      const memoryview = new Uint8Array(
+        wasm_memory.buffer,
+        ptr,
+        bytes.length
+      );
+
+      memoryview.set(bytes);
+
+      return wasm_exports.load_json(
+        ptr,
+        bytes.length
+      ) !== 0;
+
+    } finally {
+      wasm_exports.free_json(
+        ptr,
+        bytes.length
+      );
+    }
+  }
+
+  function load_from_editor() {
+    try {
+      const text = document.getElementById("json").value;
+
+      JSON.parse(text);
+
+      const bytes = new TextEncoder().encode(text);
+
+      const success = load_json_bytes(bytes);
+
+      status.textContent = success
+        ? "JSON load success"
+        : "invalid JSON";
+
+    } catch (error) {
+      status.textContent = "error: " + error.message;
+    }
+  }
+
+  async function load_from_file(file) {
+    try {
+      const buffer = await file.arrayBuffer();
+
+      const bytes = new Uint8Array(buffer);
+
+      const success = load_json_bytes(bytes);
+
+      status.textContent = success
+        ? "loaded " + file.name + " (" +
+        (file.size / 1024 / 1024).toFixed(2) +
+        " MB)"
+        : "invalid JSON!";
+
+    } catch (error) {
+      status.textContent = "Error: " + error.message;
+    }
+  }
+
+  button.addEventListener("click", load_from_editor);
+
+  document.getElementById("fileinput")
+    .addEventListener("change", function (event) {
+      const file = event.target.files[0];
+
+      if (file) {
+        load_from_file(file);
+      }
+    });
+
+  load("dist/sk-engine.wasm");
+</script>

@@ -10,6 +10,12 @@ import (
 	"ske-morph/pages"
 )
 
+func servedeck(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"ids":"%s"}`, id)
+}
 func main() {
 	mux := http.NewServeMux()
 
@@ -23,7 +29,7 @@ func main() {
 	})
 
 	mux.HandleFunc("/about", pages.ServePage("about"))
-
+	mux.HandleFunc("/engine", pages.ServePage("engine"))
 	mux.Handle(
 		"/assets/",
 		http.StripPrefix(
@@ -31,7 +37,7 @@ func main() {
 			http.FileServer(http.Dir("frontend/assets")),
 		),
 	)
-
+	mux.HandleFunc("/d/{id}", servedeck)
 	mux.Handle(
 		"/dist/",
 		http.StripPrefix(

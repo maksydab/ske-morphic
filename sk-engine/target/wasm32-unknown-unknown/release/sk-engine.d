@@ -1,0 +1,1 @@
+/home/adminer/Desktop/projproj/terra/skeumorphic/sk-engine/target/wasm32-unknown-unknown/release/sk-engine.wasm: /home/adminer/Desktop/projproj/terra/skeumorphic/sk-engine/src/data.rs /home/adminer/Desktop/projproj/terra/skeumorphic/sk-engine/src/engine.rs /home/adminer/Desktop/projproj/terra/skeumorphic/sk-engine/src/main.rs
