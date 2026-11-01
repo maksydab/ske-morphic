@@ -7,9 +7,17 @@ pub trait Render {
 pub struct Engi {
     pub game: GameData,
 }
-
+pub struct Entity {
+    
+}
 impl Engi {
     pub fn new(game: GameData) -> Self {
+        if let Some(table) = game.data["entities"].as_array() {
+            for item in table {
+                println!("{}", item);
+            }
+        }
+
         Self { game }
     }
 }
