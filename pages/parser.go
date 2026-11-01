@@ -56,11 +56,9 @@ func makeTemplateError(
 	if position < 0 {
 		position = 0
 	}
-
 	if position > len(content) {
 		position = len(content)
 	}
-
 	line := strings.Count(content[:position], "\n") + 1
 
 	return &TemplateError{
@@ -121,32 +119,26 @@ func validPath(path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("validate include path: %w", err)
 	}
-
 	if rel == ".." ||
 		strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("include path escapes frontend directory: %q", path)
 	}
-
 	resolvedRoot, err := filepath.EvalSymlinks(root)
 	if err != nil {
 		return "", fmt.Errorf("resolve frontend directory: %w", err)
 	}
-
 	resolvedTarget, err := filepath.EvalSymlinks(target)
 	if err != nil {
 		return "", fmt.Errorf("resolve include %q: %w", path, err)
 	}
-
 	rel, err = filepath.Rel(resolvedRoot, resolvedTarget)
 	if err != nil {
 		return "", fmt.Errorf("validate resolved include path: %w", err)
 	}
-
 	if rel == ".." ||
 		strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("include symlink escapes frontend directory: %q", path)
 	}
-
 	return resolvedTarget, nil
 }
 
@@ -156,13 +148,14 @@ func compileContent(
 	depth int,
 	source string,
 ) (string, error) {
+	// just in case
 	if depth > 32 {
 		return "", makeTemplateError(
 			source,
 			content,
 			0,
 			"",
-			"Maximum component nesting depth exceeded",
+			"maximum component nesting depth exceeded",
 			nil,
 			http.StatusInternalServerError,
 		)
@@ -208,12 +201,11 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					fmt.Sprintf("Invalid component path %q", includeName),
+					fmt.Sprintf("invalid component path %q", includeName),
 					err,
 					http.StatusInternalServerError,
 				)
 			}
-
 			component, err := os.ReadFile(path)
 			if err != nil {
 				return "", makeTemplateError(
@@ -221,7 +213,7 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					fmt.Sprintf("Could not read component %q", includeName),
+					fmt.Sprintf("could not read component %q", includeName),
 					err,
 					http.StatusInternalServerError,
 				)
@@ -239,14 +231,14 @@ func compileContent(
 				if strings.TrimSpace(header[1]) != "" {
 					for _, param := range strings.Split(header[1], ",") {
 						param = strings.TrimSpace(param)
-
+						// just lovely
 						if !identifierRegex.MatchString(param) {
 							return "", makeTemplateError(
 								source,
 								content,
 								match[0],
 								token,
-								fmt.Sprintf("Invalid component parameter %q", param),
+								fmt.Sprintf("invalid component parameter %q", param),
 								nil,
 								http.StatusInternalServerError,
 							)
@@ -258,7 +250,7 @@ func compileContent(
 								content,
 								match[0],
 								token,
-								fmt.Sprintf("Duplicate component parameter %q", param),
+								fmt.Sprintf("duplicate component parameter %q", param),
 								nil,
 								http.StatusInternalServerError,
 							)
@@ -282,7 +274,7 @@ func compileContent(
 							content,
 							match[0],
 							token,
-							fmt.Sprintf("Invalid component argument %q", arg),
+							fmt.Sprintf("invaldi component argument %q", arg),
 							nil,
 							http.StatusInternalServerError,
 						)
@@ -299,7 +291,7 @@ func compileContent(
 					match[0],
 					token,
 					fmt.Sprintf(
-						"Component %q expects %d arguments, but received %d",
+						"component %q expects %d arguments, but received %d",
 						includeName,
 						len(params),
 						len(args),
@@ -323,7 +315,7 @@ func compileContent(
 						content,
 						match[0],
 						token,
-						fmt.Sprintf("Unknown variable %q passed to component %q", args[i], includeName),
+						fmt.Sprintf("UNknown variable %q passed to component %q", args[i], includeName),
 						nil,
 						http.StatusInternalServerError,
 					)
@@ -364,7 +356,7 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					"Unexpected endfor: there is no open loop",
+					"enexpected endfor no loop to be ended",
 					nil,
 					http.StatusInternalServerError,
 				)
@@ -384,7 +376,7 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					"Invalid loop syntax. Expected: {|for item in collection|}",
+					"invalid loop syntax. Expected: {|for item in collection|}",
 					nil,
 					http.StatusInternalServerError,
 				)
@@ -400,7 +392,7 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					"Invalid loop variable or collection name",
+					"invalid loop variable or collection name",
 					nil,
 					http.StatusInternalServerError,
 				)
@@ -414,7 +406,7 @@ func compileContent(
 					content,
 					match[0],
 					token,
-					fmt.Sprintf("Unknown collection %q", collection),
+					fmt.Sprintf("unknown collection %q", collection),
 					nil,
 					http.StatusInternalServerError,
 				)
@@ -442,7 +434,7 @@ func compileContent(
 				content,
 				match[0],
 				token,
-				fmt.Sprintf("Unknown directive %q", token),
+				fmt.Sprintf("unknown directive %q", token),
 				nil,
 				http.StatusInternalServerError,
 			)
@@ -456,7 +448,7 @@ func compileContent(
 				content,
 				match[0],
 				token,
-				fmt.Sprintf("Unknown variable %q", token),
+				fmt.Sprintf("unknown variable %q", token),
 				nil,
 				http.StatusInternalServerError,
 			)
@@ -473,7 +465,7 @@ func compileContent(
 			content,
 			len(content),
 			"",
-			"Unclosed for loop: expected {|endfor|}",
+			"enclosed for loop expected {|endfor|}",
 			nil,
 			http.StatusInternalServerError,
 		)
@@ -484,7 +476,7 @@ func compileContent(
 
 func dict(values ...any) (map[string]any, error) {
 	if len(values)%2 != 0 {
-		return nil, fmt.Errorf("dict requires key/value pairs")
+		return nil, fmt.Errorf("dict requires key  value pairs")
 	}
 
 	result := make(map[string]any)
@@ -577,7 +569,7 @@ func buildPage(
 	if err != nil {
 		return "", &TemplateError{
 			File:       "frontend/index.html",
-			Message:    "Could not read layout file",
+			Message:    "could not read layout file",
 			Cause:      err,
 			StatusCode: http.StatusInternalServerError,
 		}
