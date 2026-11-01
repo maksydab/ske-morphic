@@ -1,5 +1,4 @@
 <style>
-
   canvas {
     display: block;
     width: 100%;
@@ -15,7 +14,7 @@
 
   <h2>SK Engine JSON Editor</h2>
 
-  <textarea id="json">{
+  <textarea id="json" style="height:500px; width:300px;">{
    "message":"hi",
    "entities":{
       "Bob":{
@@ -28,6 +27,28 @@
                   "x":3,
                   "y":3
                 }
+              }
+            },
+            {
+              "type":"visual",
+              "p":{
+                "vars":{
+                  "hello":"world"
+                },
+                "nodes":[
+                  {
+                    "t":"onClick",
+                    "to":{
+                      "t":"move",
+                      "to":-1,
+                      "v":{
+                        "t":"Value",
+                        "ty":"i64",
+                        "v":2
+                      }
+                    }
+                  }
+                ]
               }
             }
          ]
@@ -54,6 +75,7 @@
       }
    ]
 }
+
 </textarea>
 
   <br>
@@ -79,11 +101,17 @@
   const button = document.getElementById("loadbutton");
 
   miniquad_add_plugin({
-    register_plugin: function (importobject) { },
+    register_plugin: function (importobject) {
+      importobject.env.js_console_log = function (ptr, len) {
+        const memory = new Uint8Array(wasm_memory.buffer);
+        const bytes = memory.subarray(ptr, ptr + len);
+        const text = new TextDecoder().decode(bytes);
+        console.log("[sk engine]:", text);
+      };
+    },
 
     on_init: function () {
       ready = true;
-
       status.textContent = "engine ready!";
       button.disabled = false;
     }
@@ -133,8 +161,8 @@
       const success = load_json_bytes(bytes);
 
       status.textContent = success
-        ? "JSON load success"
-        : "invalid JSON";
+        ? "json load success"
+        : "invalid json";
 
     } catch (error) {
       status.textContent = "error: " + error.message;
@@ -156,7 +184,7 @@
         : "invalid JSON!";
 
     } catch (error) {
-      status.textContent = "Error: " + error.message;
+      status.textContent = "error: " + error.message;
     }
   }
 

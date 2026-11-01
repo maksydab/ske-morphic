@@ -1,9 +1,11 @@
-use crate::data::GameData;
-use macroquad::{color::Color, texture::Image, window::{screen_height, screen_width}};
-use serde_json::to_string;
-use std::{any::Any, collections::HashMap, vec};
-
-//GAME STRUCTURE
+use crate::data::*;
+use crate::visual::*;
+use macroquad::{
+    color::Color,
+    texture::Image,
+    window::{screen_height, screen_width},
+};
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Renprop {
@@ -14,6 +16,7 @@ pub struct Renprop {
 #[derive(Clone)]
 pub enum Props {
     Renprop(Renprop),
+    Visualprop(Visualprop),
 }
 
 #[derive(Clone)]
@@ -26,6 +29,7 @@ pub struct Component {
 pub struct Entity {
     pub components: HashMap<String, Component>,
 }
+
 pub struct Instance {
     pub n: String,
     pub x: f64,
@@ -33,7 +37,11 @@ pub struct Instance {
     pub w: f64,
     pub h: f64,
     pub entity: Entity,
+    pub vars: HashMap<String, Var>,
+    pub nodes: Vec<Noder>,
+    pub activeexecutionnodes: Vec<usize>,
 }
+
 pub struct Game {
     pub entities: HashMap<String, Entity>,
     pub scene: Vec<Instance>,
@@ -48,16 +56,15 @@ impl Game {
     }
 }
 
-//ENGINE
-
-
 pub trait Render {
     fn render(&self);
 }
+
 pub struct Engi {
     pub gamed: GameData,
     pub game: Game,
 }
+
 impl Engi {
     pub fn new(gamed: GameData) -> Self {
         let mut game = Game::new();
@@ -73,20 +80,61 @@ impl Engi {
                         let p = match typ.as_str() {
                             "renderer" => {
                                 let img = comp["p"]["img"].as_str().unwrap_or("");
-
                                 let w = comp["p"]["size"]["x"].as_i64().unwrap_or(0);
-
                                 let h = comp["p"]["size"]["y"].as_i64().unwrap_or(0);
 
                                 let image = strtoimg(img, w, h);
-                                let mut texture = macroquad::texture::Texture2D::from_image(&image);
-
+                                let texture = macroquad::texture::Texture2D::from_image(&image);
+                                let mut texture = texture;
                                 texture.set_filter(macroquad::texture::FilterMode::Nearest);
 
                                 Props::Renprop(Renprop {
                                     img: texture,
                                     size: (w, h),
                                 })
+                            }
+                            "visual" => {
+                                let mut vars = HashMap::new();
+                                if let Some(v_map) = comp["p"]["vars"].as_object() {
+                                    for (k, v) in v_map {
+                                        let valuer = match v {
+                                            serde_json::Value::String(s) => {
+                                                Valuer::String(s.clone())
+                                            }
+                                            serde_json::Value::Number(n) => {
+                                                if let Some(i) = n.as_i64() {
+                                                    Valuer::Int(i)
+                                                } else if let Some(f) = n.as_f64() {
+                                                    Valuer::Float(f)
+                                                } else {
+                                                    Valuer::String(n.to_string())
+                                                }
+                                            }
+                                            _ => Valuer::String(v.to_string()),
+                                        };
+                                        vars.insert(
+                                            k.clone(),
+                                            Var {
+                                                name: k.clone(),
+                                                vartype: match valuer {
+                                                    Valuer::Int(_) => 0,
+                                                    Valuer::Float(_) => 1,
+                                                    _ => 2,
+                                                },
+                                                valuer,
+                                            },
+                                        );
+                                    }
+                                }
+
+                                let mut nodes = Vec::new();
+                                if let Some(node_list) = comp["p"]["nodes"].as_array() {
+                                    for node_json in node_list {
+                                        parse_json_node(node_json, &mut nodes);
+                                    }
+                                }
+
+                                Props::Visualprop(Visualprop { vars, nodes })
                             }
 
                             _ => continue,
@@ -99,6 +147,7 @@ impl Engi {
                 game.entities.insert(name.clone(), Entity { components });
             }
         }
+
         if let Some(scene) = gamed.data["scene"].as_array() {
             for inst in scene {
                 let entity_name = inst["t"].as_str().unwrap_or("unknown").to_string();
@@ -109,6 +158,24 @@ impl Engi {
                 let h = inst["p"]["h"].as_f64().unwrap_or(1.0);
 
                 if let Some(template) = game.entities.get(&entity_name) {
+                    let mut inst_vars = HashMap::new();
+                    let mut inst_nodes = Vec::new();
+
+                    if let Some(Component {
+                        p: Props::Visualprop(vis),
+                        ..
+                    }) = template.components.get("visual")
+                    {
+                        inst_vars = vis.vars.clone();
+                        inst_nodes = vis.nodes.clone();
+                    }
+
+                    let start_nodes: Vec<usize> = inst_nodes
+                        .iter()
+                        .filter(|n| n.ty == 0)
+                        .map(|n| n.id)
+                        .collect();
+
                     game.scene.push(Instance {
                         n: entity_name.clone(),
                         x,
@@ -116,6 +183,9 @@ impl Engi {
                         w,
                         h,
                         entity: template.clone(),
+                        vars: inst_vars,
+                        nodes: inst_nodes,
+                        activeexecutionnodes: start_nodes,
                     });
                 }
             }
@@ -123,25 +193,11 @@ impl Engi {
         Self { gamed, game }
     }
 }
+
 pub const PALETTE: [Color; 3] = [
-    Color {
-        r: 1.0,
-        g: 1.0,
-        b: 1.0,
-        a: 1.0,
-    },
-    Color {
-        r: 0.0,
-        g: 1.0,
-        b: 1.0,
-        a: 1.0,
-    },
-    Color {
-        r: 1.0,
-        g: 0.0,
-        b: 1.0,
-        a: 1.0,
-    },
+    Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
+    Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
+    Color { r: 1.0, g: 0.0, b: 1.0, a: 1.0 },
 ];
 
 pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
@@ -150,12 +206,10 @@ pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
     let pixels: Vec<Color> = img
         .chars()
         .map(|c| {
-            let index = c.to_digit(10).expect("invalid palttee index") as usize;
-
+            let index = c.to_digit(10).expect("invalid palette index") as usize;
             PALETTE[index - 1]
         })
         .collect();
-
     Image {
         width: w as u16,
         height: h as u16,
@@ -173,14 +227,66 @@ pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
     }
 }
 
+impl Engi {
+    pub fn update(&mut self) {
+        if macroquad::input::is_mouse_button_pressed(macroquad::input::MouseButton::Left) {
+            let (mouse_x, mouse_y) = macroquad::input::mouse_position();
+            let screen_w = screen_width();
+            let screen_h = screen_height();
+            let board_size = f32::min(screen_w, screen_h);
+            let unit = board_size / 10.0;
+            let offset_x = (screen_w - board_size) / 2.0;
+            let offset_y = (screen_h - board_size) / 2.0;
+
+            for instance in &mut self.game.scene {
+                let inst_screen_x = offset_x + (instance.x as f32 * unit);
+                let inst_screen_y = offset_y + (instance.y as f32 * unit);
+                let inst_screen_w = instance.w as f32 * unit;
+                let inst_screen_h = instance.h as f32 * unit;
+
+                if mouse_x >= inst_screen_x && mouse_x <= inst_screen_x + inst_screen_w &&
+                   mouse_y >= inst_screen_y && mouse_y <= inst_screen_y + inst_screen_h {
+                    
+                    let click_nodes: Vec<usize> = instance.nodes
+                        .iter()
+                        .filter(|n| n.ty == 2) 
+                        .map(|n| n.id)
+                        .collect();
+                    
+                    instance.activeexecutionnodes.extend(click_nodes);
+                }
+            }
+        }
+
+        for instance in &mut self.game.scene {
+            if instance.activeexecutionnodes.is_empty() {
+                continue;
+            }
+
+            let current_nodes = std::mem::take(&mut instance.activeexecutionnodes);
+            let mut next_nodes = Vec::new();
+
+            for node_idx in current_nodes {
+                if node_idx < instance.nodes.len() {
+                    let props = instance.nodes[node_idx].props.clone();
+                    let nodesclone = instance.nodes.clone();
+                    let subsequent = props.execute(instance, &nodesclone);
+                    next_nodes.extend(subsequent);
+                }
+            }
+            instance.activeexecutionnodes = next_nodes;
+        }
+    }
+}
+
 impl Render for Engi {
     fn render(&self) {
         let screen_w = screen_width();
         let screen_h = screen_height();
-        
+
         let board_size = f32::min(screen_w, screen_h);
         let unit = board_size / 10.0;
-        
+
         let offset_x = (screen_w - board_size) / 2.0;
         let offset_y = (screen_h - board_size) / 2.0;
 
@@ -206,14 +312,12 @@ impl Render for Engi {
                             screen_y,
                             macroquad::prelude::WHITE,
                             macroquad::texture::DrawTextureParams {
-                                dest_size: Some(macroquad::prelude::vec2(
-                                    screen_w_px,
-                                    screen_h_px,
-                                )),
+                                dest_size: Some(macroquad::prelude::vec2(screen_w_px, screen_h_px)),
                                 ..Default::default()
                             },
                         );
                     }
+                    Props::Visualprop(_) => {}
                 }
             }
         }
