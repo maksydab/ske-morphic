@@ -56,7 +56,7 @@ pub extern "C" fn load_json(ptr: *const u8, size: usize) -> bool {
 
     true
 }
-#[macroquad::main("sk Engine")]
+#[macroquad::main("sk engine")]
 async fn main() {
     loop {
         clear_background(DARKGRAY);

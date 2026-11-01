@@ -4,6 +4,7 @@ pub struct GameData {
 }
 
 impl GameData {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             data: serde_json::json!({})

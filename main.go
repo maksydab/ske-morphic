@@ -13,12 +13,14 @@ import (
 func servedeck(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"ids":"%s"}`, id)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	pages.ServePage("deck", map[string]any{
+		"id": id,
+	})(w, r)
 }
 func main() {
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			serve404(w, r)
