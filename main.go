@@ -61,9 +61,9 @@ func main() {
 		fmt.Fprintln(w, `{"package":"ske-morph","version":"0.1"}`)
 	})
 
-	fmt.Println("Server running at http://localhost:8080")
+	fmt.Println("Server running at http://localhost:8082")
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":8082", mux))
 }
 
 func serve404(w http.ResponseWriter, r *http.Request) {
