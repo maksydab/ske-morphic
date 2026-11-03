@@ -17,6 +17,7 @@
   --bg-accent:rgb(22, 49, 31);
   --uni-padding:8px;
   --roundness:2px;
+  --topbar-size:64px;
 }
 *{
   font-family: "JetBrains Mono", monospace;

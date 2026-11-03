@@ -40,11 +40,19 @@
                     "t":"onClick",
                     "to":{
                       "t":"move",
-                      "to":-1,
-                      "v":{
-                        "t":"Value",
-                        "ty":"i64",
-                        "v":2
+                      "inputs": {
+                        "by": {
+                          "t":"add",
+                          "inputs": {
+                            "a": {
+                              "t":"getProp",
+                              "inputs": {
+                                "n": "x"
+                              }
+                            },
+                            "b":0.5
+                          }
+                        }
                       }
                     }
                   }

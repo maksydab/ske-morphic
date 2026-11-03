@@ -1,0 +1,31 @@
+
+.panel-de {
+    height: calc(100vh - var(--topbar-size));
+    width: 100%;
+    overflow: hidden;
+}
+
+.panel-de .flex {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.sidebarr {
+    width: 250px;
+    min-width: 250px;
+    height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-de canvas {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: #333;
+}
+

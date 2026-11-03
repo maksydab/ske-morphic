@@ -32,6 +32,7 @@ func main() {
 
 	mux.HandleFunc("/about", pages.ServePage("about"))
 	mux.HandleFunc("/engine", pages.ServePage("engine"))
+	mux.HandleFunc("/editor", pages.ServePage("editor"))
 	mux.Handle(
 		"/assets/",
 		http.StripPrefix(

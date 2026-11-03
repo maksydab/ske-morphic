@@ -788,7 +788,7 @@ func ServePage(page string, pageData ...map[string]any) http.HandlerFunc {
 		}
 
 		if _, err := w.Write([]byte(output)); err != nil {
-			log.Printf("Response write error: %v", err)
+			log.Printf("responser write error: %v", err)
 		}
 	}
 }

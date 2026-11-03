@@ -85,7 +85,7 @@ impl Engi {
 
                                 let image = strtoimg(img, w, h);
                                 let texture = macroquad::texture::Texture2D::from_image(&image);
-                                let mut texture = texture;
+                                let texture = texture;
                                 texture.set_filter(macroquad::texture::FilterMode::Nearest);
 
                                 Props::Renprop(Renprop {

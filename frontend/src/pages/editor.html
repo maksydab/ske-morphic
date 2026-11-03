@@ -1,0 +1,131 @@
+<style>
+  body {
+    overflow-y: hidden;
+  }
+</style>
+<header class="flex cont y-center" style="margin-top: 0; height:48px;">
+  <button class="ibut btn margin" id="bt-d" onclick="switcharoo(0)">D</button>
+  <button class="ibut btn margin" id="bt-v" onclick="switcharoo(1)">V</button>
+  <button class="ibut btn margin" id="bt-p" onclick="switcharoo(2)">P</button>
+</header>
+
+<div class="panel-de block">
+  <div class="flex">
+    <div class="sidebarr bg" id="list-of-en">
+
+      <h1>entities</h1>
+
+      <div class="entity-list">
+      </div>
+      <button class="bottom">Add entity</button>
+
+    </div>
+
+    <canvas id="editor-canvas"></canvas>
+  </div>
+  <script src=""></script>
+</div>
+<div class="panel-vc hide">
+  <h1>DE</h1>
+</div>
+
+<div class="panel-play hide">
+  <canvas id="glcanvas" tabindex="1"></canvas>
+</div>
+<!--
+<div class="editor">
+  <h2>SK Engine JSON Editor</h2>
+  <textarea id="json" style="height:200px; width:300px;">{
+   "message":"hi",
+   "entities":{
+      "Bob":{
+         "components":[
+            {
+              "type":"renderer",
+              "p":{
+                "img":"121212333",
+                "size":{
+                  "x":3,
+                  "y":3
+                }
+              }
+            },
+            {
+              "type":"visual",
+              "p":{
+                "vars":{
+                  "hello":"world"
+                },
+                "nodes":[
+                  {
+                    "t":"onClick",
+                    "to":{
+                      "t":"move",
+                      "inputs": {
+                        "by": {
+                          "t":"add",
+                          "inputs": {
+                            "a": {
+                              "t":"getProp",
+                              "inputs": {
+                                "n": "x"
+                              }
+                            },
+                            "b":0.5
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+         ]
+      }
+   },
+   "scene":[
+      {
+        "t":"Bob",
+        "p":{
+          "x":9.0,
+          "y":9.0,
+          "w":1.0,
+          "h":1.0
+        }
+      },
+      {
+        "t":"Bob",
+        "p":{
+          "x":0.0,
+          "y":0.0,
+          "w":2.0,
+          "h":1.0
+        }
+      }
+   ]
+}
+</textarea>
+  <br>
+  <button id="loadbutton" disabled>load json</button>
+  <br>
+  <input type="file" id="fileinput" accept=".json,application/json">
+  <div id="status">loading the engine...</div>
+</div>-->
+
+<script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
+<script src="/dist/sk-engine.js"></script>
+<script>
+  const classes = ["panel-de", "panel-vc", "panel-play"];
+
+  function switcharoo(i) {
+    for (let j = 0; j < classes.length; j++) {
+      const panel = document.querySelector("." + classes[j]);
+
+      if (j === i) {
+        panel.className = classes[j] + " block";
+      } else {
+        panel.className = classes[j] + " hide";
+      }
+    }
+  }
+</script>

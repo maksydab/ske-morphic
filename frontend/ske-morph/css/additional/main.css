@@ -1,5 +1,6 @@
+@import url("editor_utils.css");
 .sick_back {
-  background: url("/assets/background.png") no-repeat;
+  background: url("/assets/a/background.png") no-repeat;
   background-size: cover;
 }
 main.sick_back {
@@ -36,4 +37,9 @@ main.sick_back {
   min-height: 200px;
   object-fit: cover;
   flex-shrink: 0;
+}
+.ibut{
+  width: auto;
+  height:100%;
+  aspect-ratio: 1/1;
 }

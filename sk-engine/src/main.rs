@@ -6,6 +6,7 @@ mod data;
 use data::*;
 
 mod visual;
+#[allow(unused_imports)]
 use visual::*;
 
 mod engine;
@@ -106,6 +107,11 @@ async fn main() {
         ENGI.with(|engi| {
             if let Some(engi) = engi.borrow_mut().as_mut() {
                 engi.update();
+            }
+        });
+
+        ENGI.with(|engi| {
+            if let Some(engi) = engi.borrow_mut().as_mut() {
                 engi.render();
             } else {
                 draw_text(
