@@ -1,4 +1,3 @@
-
 .panel-de {
     height: calc(100vh - var(--topbar-size));
     width: 100%;
@@ -28,13 +27,50 @@
     height: 100%;
     background: #333;
 }
+
 .panel-play {
     width: 100%;
-    height: 100vh;
+    height: calc(100vh - var(--topbar-size));
     overflow: hidden;
 }
+
 #glcanvas {
     display: block;
     width: 100%;
     height: 100%;
+}
+
+.entity-item {
+    padding: 8px;
+    margin: 2px;
+    cursor: grab;
+    user-select: none;
+}
+
+.entity-item:active {
+    cursor: grabbing;
+}
+
+.panel-de {
+    flex: 1;
+    min-width: 0;
+}
+
+#editor-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.flex1 {
+    flex: 1;
+}
+.panel-vc {
+    width: 100%;
+    height: calc(100vh - var(--topbar-size));
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
 }

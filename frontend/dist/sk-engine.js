@@ -1,5 +1,4 @@
-
-const SKEngine = (() => {
+window.SKEngine = (() => {
     let ready = false;
 
     miniquad_add_plugin({
@@ -49,18 +48,21 @@ const SKEngine = (() => {
         }
     }
 
-    function load_json(text) {
+    function load_json(text, canvasid = "glcanvas") {
         JSON.parse(text);
 
-        const bytes = new TextEncoder().encode(text);
+        const targetcanvas = document.getElementById(canvasid);
+        if (targetcanvas) {
+            targetcanvas.focus();
+        }
 
+        const bytes = new TextEncoder().encode(text);
         return load_bytes(bytes);
     }
 
-    async function load_file(file) {
+    async function load_file(file, canvasid = "glcanvas") {
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-
         return load_bytes(bytes);
     }
 
@@ -72,5 +74,4 @@ const SKEngine = (() => {
     };
 })();
 
-load("dist/sk-engine.wasm");
-
+load("/dist/sk-engine.wasm");

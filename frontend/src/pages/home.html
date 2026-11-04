@@ -16,11 +16,11 @@
     Background from <a class="link" href="https://github.com/jhuckaby/canvascycle" target="_blank">here</a>
   </p>
 </main>
-<div class="paddin">
+<div class="paddin hide">
   <h1>Featured discs:</h1>
   <div class="flex">
     {|for d in featured|}
-    {|include src/components/ui/Disc.html (d)|}
+      {|include src/components/ui/Disc.html (d)|}
     {|endfor|}
   </div>
 </div>
