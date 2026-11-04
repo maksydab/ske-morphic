@@ -30,7 +30,7 @@
 </div>
 
 <div class="panel-play hide">
-  <canvas id="glcanvas" tabindex="1"></canvas>
+  <canvas id="glcanvas" tabindex="1" ></canvas>
 </div>
 <!--
 <div class="editor">
@@ -116,7 +116,14 @@
 <script src="/dist/sk-engine.js"></script>
 <script>
   const classes = ["panel-de", "panel-vc", "panel-play"];
+  const game = {
+    "entities":{
 
+    },
+    "instances":[
+
+    ]
+  }
   function switcharoo(i) {
     for (let j = 0; j < classes.length; j++) {
       const panel = document.querySelector("." + classes[j]);
@@ -127,5 +134,11 @@
         panel.className = classes[j] + " hide";
       }
     }
+  }
+  function refreshEntityList(){
+    const er=game["entities"]
+  }
+  function addentity(){
+
   }
 </script>
