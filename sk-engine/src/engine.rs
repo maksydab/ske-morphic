@@ -357,12 +357,12 @@ impl Render for Engi {
         let offset_x = (screen_w - board_size) / 2.0;
         let offset_y = (screen_h - board_size) / 2.0;
 
-        let message = format!(
+        /*let message = format!(
             "message: {}\nentities: {}\nscene: {}",
             self.gamed.data["message"].as_str().unwrap_or(""),
             self.game.entities.len(),
             self.game.scene.len()
-        );
+        );*/
 
         for ins in &self.game.scene {
             if let Some(component) = ins.entity.components.get("renderer") {
@@ -389,7 +389,7 @@ impl Render for Engi {
             }
         }
 
-        for (i, line) in message.lines().enumerate() {
+        /*for (i, line) in message.lines().enumerate() {
             macroquad::prelude::draw_text(
                 line,
                 offset_x + (0.5 * unit),
@@ -397,6 +397,6 @@ impl Render for Engi {
                 2.0 * unit / 3.0,
                 macroquad::prelude::WHITE,
             );
-        }
+        }*/
     }
 }
