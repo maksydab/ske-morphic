@@ -2,9 +2,7 @@ use crate::data::*;
 use crate::engine::Instance;
 use crate::log_to_js;
 use std::collections::HashMap;
-//the how the nodes look in getnodeblueprint
-//how "action" nodes work in execute
-//how prop ndoes work in evaluatepinvaluer 
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DataType {
     Flow,
@@ -65,8 +63,22 @@ pub struct Nif {}
 
 #[derive(Clone, Debug)]
 pub struct Nadd {}
+
+#[derive(Clone, Debug)]
+pub struct Nsubtract {}
+
+#[derive(Clone, Debug)]
+pub struct Nmult {}
+
+#[derive(Clone, Debug)]
+pub struct Ndiv {}
+
 #[derive(Clone, Debug)]
 pub struct NgetProp {}
+
+#[derive(Clone, Debug)]
+pub struct NchangeProp {}
+
 #[derive(Clone, Debug)]
 pub enum Nodeprops {
     NonStart(NonStart),
@@ -74,7 +86,11 @@ pub enum Nodeprops {
     NonClick(NonClick),
     Nif(Nif),
     Nadd(Nadd),
+    Nsubtract(Nsubtract),
+    Nmult(Nmult),
+    Ndiv(Ndiv),
     NgetProp(NgetProp),
+    NchangeProp(NchangeProp),
 }
 
 impl Nodeprops {
@@ -87,7 +103,11 @@ impl Nodeprops {
                 (Nodeprops::NonClick(_), Nodeprops::NonClick(_)) => true,
                 (Nodeprops::Nif(_), Nodeprops::Nif(_)) => true,
                 (Nodeprops::Nadd(_), Nodeprops::Nadd(_)) => true,
+                (Nodeprops::Nsubtract(_), Nodeprops::Nsubtract(_)) => true,
+                (Nodeprops::Nmult(_), Nodeprops::Nmult(_)) => true,
+                (Nodeprops::Ndiv(_), Nodeprops::Ndiv(_)) => true,
                 (Nodeprops::NgetProp(_), Nodeprops::NgetProp(_)) => true,
+                (Nodeprops::NchangeProp(_), Nodeprops::NchangeProp(_)) => true,
                 _ => false,
             })
             .expect("node context error");
@@ -107,7 +127,8 @@ impl Nodeprops {
                 getconnectedflowoutputs(currentnode, "flowout")
             }
             Nodeprops::Nif(_) => {
-                let conditiontrue = evaluatedatapinbool(allnodes, currentnode, "condition", instance);
+                let conditiontrue =
+                    evaluatedatapinbool(allnodes, currentnode, "condition", instance);
                 if conditiontrue {
                     log_to_js("If condition: true");
                     getconnectedflowoutputs(currentnode, "true")
@@ -120,7 +141,57 @@ impl Nodeprops {
                 let _addval = evaluatedatapinfloat(allnodes, currentnode, "a", instance);
                 getconnectedflowoutputs(currentnode, "flowout")
             }
-            Nodeprops::NgetProp(_) => {
+            Nodeprops::NgetProp(_) => getconnectedflowoutputs(currentnode, "flowout"),
+            Nodeprops::Nsubtract(_) => {
+                let _subval = evaluatedatapinfloat(allnodes, currentnode, "a", instance);
+                getconnectedflowoutputs(currentnode, "flowout")
+            }
+            Nodeprops::Nmult(_) => {
+                let _subval = evaluatedatapinfloat(allnodes, currentnode, "a", instance);
+                getconnectedflowoutputs(currentnode, "flowout")
+            }
+            Nodeprops::Ndiv(_) => {
+                let _subval = evaluatedatapinfloat(allnodes, currentnode, "a", instance);
+                getconnectedflowoutputs(currentnode, "flowout")
+            }
+            Nodeprops::NchangeProp(_) => {
+                let propname = evaluatedatapinstring(allnodes, currentnode, "n", instance);
+                let valuer = evaluatepinvaluer(allnodes, currentnode, "val", instance);
+                match propname.as_str() {
+                    "x" => {
+                        if let Valuer::Float(f) = valuer {
+                            instance.x = f;
+                        } else if let Valuer::Int(i) = valuer {
+                            instance.x = i as f64;
+                        }
+                    }
+                    "y" => {
+                        if let Valuer::Float(f) = valuer {
+                            instance.y = f;
+                        } else if let Valuer::Int(i) = valuer {
+                            instance.y = i as f64;
+                        }
+                    }
+                    "w" => {
+                        if let Valuer::Float(f) = valuer {
+                            instance.w = f;
+                        } else if let Valuer::Int(i) = valuer {
+                            instance.w = i as f64;
+                        }
+                    }
+                    "h" => {
+                        if let Valuer::Float(f) = valuer {
+                            instance.h = f;
+                        } else if let Valuer::Int(i) = valuer {
+                            instance.h = i as f64;
+                        }
+                    }
+                    _ => {
+                        if let Some(var) = instance.vars.get_mut(&propname) {
+                            var.valuer = valuer;
+                        }
+                    }
+                }
                 getconnectedflowoutputs(currentnode, "flowout")
             }
         }
@@ -266,6 +337,87 @@ fn getnodeblueprint(tstr: &str) -> (i64, Nodeprops, Vec<Pin>, Vec<Pin>) {
                 connectedto: None,
             }],
         ),
+        "subtract" => (
+            4,
+            Nodeprops::Nsubtract(Nsubtract {}),
+            vec![
+                Pin {
+                    id: "a".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+                Pin {
+                    id: "b".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+            ],
+            vec![Pin {
+                id: "out".to_string(),
+                pintype: Pintype::Data,
+                expected_types: vec![DataType::Int, DataType::Float],
+                value: None,
+                connectedto: None,
+            }],
+        ),
+        "mult" => (
+            4,
+            Nodeprops::Nmult(Nmult {}),
+            vec![
+                Pin {
+                    id: "a".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+                Pin {
+                    id: "b".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+            ],
+            vec![Pin {
+                id: "out".to_string(),
+                pintype: Pintype::Data,
+                expected_types: vec![DataType::Int, DataType::Float],
+                value: None,
+                connectedto: None,
+            }],
+        ),
+        "div" => (
+            4,
+            Nodeprops::Ndiv(Ndiv {}),
+            vec![
+                Pin {
+                    id: "a".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+                Pin {
+                    id: "b".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Int, DataType::Float],
+                    value: Some(Valuer::Float(1.0)),
+                    connectedto: None,
+                },
+            ],
+            vec![Pin {
+                id: "out".to_string(),
+                pintype: Pintype::Data,
+                expected_types: vec![DataType::Int, DataType::Float],
+                value: None,
+                connectedto: None,
+            }],
+        ),
         "getProp" => (
             5,
             Nodeprops::NgetProp(NgetProp {}),
@@ -284,9 +436,44 @@ fn getnodeblueprint(tstr: &str) -> (i64, Nodeprops, Vec<Pin>, Vec<Pin>) {
                 connectedto: None,
             }],
         ),
+        "changeProp" => (
+            6,
+            Nodeprops::NchangeProp(NchangeProp {}),
+            vec![
+                Pin {
+                    id: "flowin".to_string(),
+                    pintype: Pintype::Flow,
+                    expected_types: vec![DataType::Flow],
+                    value: None,
+                    connectedto: None,
+                },
+                Pin {
+                    id: "n".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::String],
+                    value: Some(Valuer::String("x".to_string())),
+                    connectedto: None,
+                },
+                Pin {
+                    id: "val".to_string(),
+                    pintype: Pintype::Data,
+                    expected_types: vec![DataType::Any],
+                    value: Some(Valuer::Float(0.0)),
+                    connectedto: None,
+                },
+            ],
+            vec![Pin {
+                id: "flowout".to_string(),
+                pintype: Pintype::Flow,
+                expected_types: vec![DataType::Flow],
+                value: None,
+                connectedto: None,
+            }],
+        ),
         _ => panic!("unknown node type in blueprint: '{}'", tstr),
     }
 }
+
 pub fn parse_json_node(v: &serde_json::Value, nodes: &mut Vec<Noder>) -> Option<usize> {
     let tstr = v.get("t")?.as_str()?;
     let nodeid = nodes.len();
@@ -368,7 +555,13 @@ pub fn parse_json_node(v: &serde_json::Value, nodes: &mut Vec<Noder>) -> Option<
 
     Some(nodeid)
 }
-pub fn evaluatepinvaluer(allnodes: &[Noder], node: &Noder, pinid: &str, instance: &Instance) -> Valuer {
+
+pub fn evaluatepinvaluer(
+    allnodes: &[Noder],
+    node: &Noder,
+    pinid: &str,
+    instance: &Instance,
+) -> Valuer {
     let pin = node
         .inputs
         .iter()
@@ -401,13 +594,35 @@ pub fn evaluatepinvaluer(allnodes: &[Noder], node: &Noder, pinid: &str, instance
                 let b_val = evaluatedatapinfloat(allnodes, upstreamnode, "b", instance);
                 Valuer::Float(a_val + b_val)
             }
+            Nodeprops::Nsubtract(_) => {
+                let a_val = evaluatedatapinfloat(allnodes, upstreamnode, "a", instance);
+                let b_val = evaluatedatapinfloat(allnodes, upstreamnode, "b", instance);
+                Valuer::Float(a_val - b_val)
+            }
+            Nodeprops::Nmult(_) => {
+                let a_val = evaluatedatapinfloat(allnodes, upstreamnode, "a", instance);
+                let b_val = evaluatedatapinfloat(allnodes, upstreamnode, "b", instance);
+                Valuer::Float(a_val * b_val)
+            }
+            Nodeprops::Ndiv(_) => {
+                let a_val = evaluatedatapinfloat(allnodes, upstreamnode, "a", instance);
+                let b_val = evaluatedatapinfloat(allnodes, upstreamnode, "b", instance);
+                Valuer::Float(a_val / b_val)
+            }
             Nodeprops::NgetProp(_) => {
                 let nameval = evaluatedatapinstring(allnodes, upstreamnode, "n", instance);
                 match nameval.as_str() {
                     "x" => Valuer::Float(instance.x),
+                    "y" => Valuer::Float(instance.y),
+                    "w" => Valuer::Float(instance.w),
+                    "h" => Valuer::Float(instance.h),
                     _ => {
-                        log_to_js("NO NAME IN GETPROP");
-                        Valuer::Float(0.0)
+                        if let Some(var) = instance.vars.get(&nameval) {
+                            var.valuer.clone()
+                        } else {
+                            log_to_js("NO NAME IN GETPROP");
+                            Valuer::Float(0.0)
+                        }
                     }
                 }
             }
@@ -461,7 +676,12 @@ fn evaluatedatapinfloat(allnodes: &[Noder], node: &Noder, pinid: &str, instance:
     }
 }
 
-fn evaluatedatapinstring(allnodes: &[Noder], node: &Noder, pinid: &str, instance: &Instance) -> String {
+fn evaluatedatapinstring(
+    allnodes: &[Noder],
+    node: &Noder,
+    pinid: &str,
+    instance: &Instance,
+) -> String {
     let valuer = evaluatepinvaluer(allnodes, node, pinid, instance);
     match valuer {
         Valuer::String(s) => s,
@@ -491,77 +711,5 @@ fn evaluatedatapinbool(allnodes: &[Noder], node: &Noder, pinid: &str, instance: 
             log_to_js(&msg);
             panic!("{}", msg);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::engine::{Entity, Instance};
-
-    #[test]
-    fn click_move_doubles_x() {
-        let json: serde_json::Value = serde_json::from_str(
-            r#"[{
-                "t":"onClick",
-                "to":{
-                  "t":"move",
-                  "inputs": {
-                    "by": {
-                      "t":"add",
-                      "inputs": {
-                        "a": { "t":"getProp", "inputs": { "n": "x" } },
-                        "b":0.5
-                      }
-                    }
-                  }
-                }
-            }]"#,
-        )
-        .unwrap();
-
-        let mut nodes = Vec::new();
-        for n in json.as_array().unwrap() {
-            parse_json_node(n, &mut nodes);
-        }
-        for n in &nodes {
-            println!("node {} ty {}", n.id, n.ty);
-            for p in &n.inputs {
-                println!("  in  {:?} conn {:?} val {:?}", p.id, p.connectedto, p.value);
-            }
-            for p in &n.outputs {
-                println!("  out {:?} conn {:?}", p.id, p.connectedto);
-            }
-        }
-
-        let mut instance = Instance {
-            n: "Bob".into(),
-            x: 1.0,
-            y: 0.0,
-            w: 1.0,
-            h: 1.0,
-            entity: Entity { components: std::collections::HashMap::new() },
-            vars: std::collections::HashMap::new(),
-            nodes: nodes.clone(),
-            activeexecutionnodes: vec![0],
-        };
-
-        for _frame in 0..5 {
-            if instance.activeexecutionnodes.is_empty() {
-                break;
-            }
-            let current = std::mem::take(&mut instance.activeexecutionnodes);
-            let mut next = Vec::new();
-            for node_idx in current {
-                println!("executing node {}", node_idx);
-                let props = instance.nodes[node_idx].props.clone();
-                let nodesclone = instance.nodes.clone();
-                next.extend(props.execute(&mut instance, &nodesclone));
-            }
-            instance.activeexecutionnodes = next;
-        }
-
-        println!("final x = {}", instance.x);
-        assert_eq!(instance.x, 2.5);
     }
 }

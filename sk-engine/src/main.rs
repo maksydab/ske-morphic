@@ -40,13 +40,12 @@ pub extern "C" fn free_json(ptr: *mut u8, size: usize) {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn load_json(ptr: *const u8, size: usize) -> bool {
+    log_to_js("attempt to load json.");
     if ptr.is_null() {
         return false;
     }
 
-    let bytes = unsafe {
-        std::slice::from_raw_parts(ptr, size)
-    };
+    let bytes = unsafe { std::slice::from_raw_parts(ptr, size) };
 
     let data: Value = match serde_json::from_slice(bytes) {
         Ok(data) => data,
@@ -103,7 +102,8 @@ async fn main() {
 
     loop {
         clear_background(DARKGRAY);
-
+        log_to_js("running");
+        draw_text("waiting for game data...", 40.0, 100.0, 30.0, WHITE);
         ENGI.with(|engi| {
             if let Some(engi) = engi.borrow_mut().as_mut() {
                 engi.update();
@@ -114,13 +114,7 @@ async fn main() {
             if let Some(engi) = engi.borrow_mut().as_mut() {
                 engi.render();
             } else {
-                draw_text(
-                    "waiting for game data...",
-                    40.0,
-                    100.0,
-                    30.0,
-                    WHITE,
-                );
+                draw_text("waiting for game data...", 40.0, 100.0, 30.0, WHITE);
             }
         });
 

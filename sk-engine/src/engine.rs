@@ -194,11 +194,74 @@ impl Engi {
     }
 }
 
-pub const PALETTE: [Color; 3] = [
-    Color { r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
-    Color { r: 0.0, g: 1.0, b: 1.0, a: 1.0 },
-    Color { r: 1.0, g: 0.0, b: 1.0, a: 1.0 },
+pub const PALETTE: [Color; 64] = [
+    Color { r: 0.078, g: 0.078, b: 0.078, a: 1.0 },// #141414
+    Color { r: 0.157, g: 0.161, b: 0.169, a: 1.0 },// #28292b
+    Color { r: 0.384, g: 0.333, b: 0.396, a: 1.0 },// #625565
+    Color { r: 0.643, g: 0.408, b: 0.408, a: 1.0 },// #a46868
+    Color { r: 0.725, g: 0.604, b: 0.463, a: 1.0 },// #b99a76
+    Color { r: 0.416, g: 0.267, b: 0.376, a: 1.0 },// #6a4460
+    Color { r: 0.498, g: 0.439, b: 0.541, a: 1.0 },// #7f708a
+    Color { r: 0.608, g: 0.698, b: 0.737, a: 1.0 },// #9bb2bc
+    Color { r: 0.788, g: 0.894, b: 0.835, a: 1.0 },// #c9e4d5
+    Color { r: 1.000, g: 1.000, b: 1.000, a: 1.0 },// #ffffff
+    Color { r: 0.447, g: 0.098, b: 0.098, a: 1.0 },// #721919
+    Color { r: 0.749, g: 0.141, b: 0.106, a: 1.0 },// #bf241b
+    Color { r: 1.000, g: 0.286, b: 0.169, a: 1.0 },// #ff492b
+    Color { r: 1.000, g: 0.502, b: 0.290, a: 1.0 },// #ff804a
+    Color { r: 0.729, g: 0.051, b: 0.133, a: 1.0 },// #ba0d22
+    Color { r: 1.000, g: 0.180, b: 0.180, a: 1.0 },// #ff2e2e
+    Color { r: 1.000, g: 0.439, b: 0.137, a: 1.0 },// #ff7023
+    Color { r: 1.000, g: 0.608, b: 0.098, a: 1.0 },// #ff9b19
+    Color { r: 1.000, g: 0.784, b: 0.184, a: 1.0 },// #ffc82f
+    Color { r: 0.498, g: 0.129, b: 0.235, a: 1.0 },// #7f213c
+    Color { r: 0.655, g: 0.208, b: 0.149, a: 1.0 },// #a73526
+    Color { r: 0.898, g: 0.396, b: 0.184, a: 1.0 },// #e5652f
+    Color { r: 0.992, g: 0.576, b: 0.255, a: 1.0 },// #fd9341
+    Color { r: 1.000, g: 0.745, b: 0.353, a: 1.0 },// #ffbe5a
+    Color { r: 0.298, g: 0.227, b: 0.102, a: 1.0 },// #4c3a1a
+    Color { r: 0.412, g: 0.408, b: 0.153, a: 1.0 },// #696827
+    Color { r: 0.663, g: 0.698, b: 0.204, a: 1.0 },// #a9b234
+    Color { r: 0.918, g: 0.969, b: 0.243, a: 1.0 },// #eaf73e
+    Color { r: 0.984, g: 1.000, b: 0.565, a: 1.0 },// #fbff90
+    Color { r: 0.039, g: 0.361, b: 0.294, a: 1.0 },// #0a5c4b
+    Color { r: 0.067, g: 0.596, b: 0.376, a: 1.0 },// #119860
+    Color { r: 0.024, g: 0.792, b: 0.435, a: 1.0 },// #06ca6f
+    Color { r: 0.573, g: 0.933, b: 0.376, a: 1.0 },// #92ee60
+    Color { r: 0.859, g: 0.949, b: 0.388, a: 1.0 },// #dbf263
+    Color { r: 0.192, g: 0.212, b: 0.220, a: 1.0 },// #313638
+    Color { r: 0.180, g: 0.302, b: 0.282, a: 1.0 },// #2e4d48
+    Color { r: 0.278, g: 0.506, b: 0.365, a: 1.0 },// #47815d
+    Color { r: 0.584, g: 0.714, b: 0.510, a: 1.0 },// #95b682
+    Color { r: 0.737, g: 0.776, b: 0.557, a: 1.0 },// #bcc68e
+    Color { r: 0.000, g: 0.369, b: 0.400, a: 1.0 },// #005e66
+    Color { r: 0.000, g: 0.541, b: 0.565, a: 1.0 },// #008a90
+    Color { r: 0.000, g: 0.702, b: 0.616, a: 1.0 },// #00b39d
+    Color { r: 0.122, g: 0.988, b: 0.792, a: 1.0 },// #1ffcca
+    Color { r: 0.573, g: 1.000, b: 0.910, a: 1.0 },// #92ffe8
+    Color { r: 0.157, g: 0.161, b: 0.325, a: 1.0 },// #282953
+    Color { r: 0.231, g: 0.243, b: 0.478, a: 1.0 },// #3b3e7a
+    Color { r: 0.263, g: 0.384, b: 0.784, a: 1.0 },// #4362c8
+    Color { r: 0.251, g: 0.627, b: 0.992, a: 1.0 },// #40a0fd
+    Color { r: 0.600, g: 0.843, b: 1.000, a: 1.0 },// #99d7ff
+    Color { r: 0.267, g: 0.125, b: 0.235, a: 1.0 },// #44203c
+    Color { r: 0.420, g: 0.192, b: 0.471, a: 1.0 },// #6b3178
+    Color { r: 0.600, g: 0.341, b: 0.729, a: 1.0 },// #9957ba
+    Color { r: 0.671, g: 0.510, b: 1.000, a: 1.0 },// #ab82ff
+    Color { r: 0.957, g: 0.675, b: 0.973, a: 1.0 },// #f4acf8
+    Color { r: 0.471, g: 0.180, b: 0.306, a: 1.0 },// #782e4e
+    Color { r: 0.667, g: 0.224, b: 0.408, a: 1.0 },// #aa3968
+    Color { r: 0.886, g: 0.361, b: 0.490, a: 1.0 },// #e25c7d
+    Color { r: 0.996, g: 0.478, b: 0.596, a: 1.0 },// #fe7a98
+    Color { r: 0.541, g: 0.043, b: 0.357, a: 1.0 },// #8a0b5b
+    Color { r: 0.824, g: 0.043, b: 0.278, a: 1.0 },// #d20b47
+    Color { r: 1.000, g: 0.290, b: 0.471, a: 1.0 },// #ff4a78
+    Color { r: 1.000, g: 0.510, b: 0.510, a: 1.0 },// #ff8282
+    Color { r: 1.000, g: 0.678, b: 0.592, a: 1.0 },// #ffad97
+    Color { r: 1.000, g: 0.820, b: 0.722, a: 1.0 },// #ffd1b8
 ];
+
+const CHARSET: &[u8] = b"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 
 pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
     assert_eq!(img.len(), (w as usize) * (h as usize));
@@ -206,8 +269,12 @@ pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
     let pixels: Vec<Color> = img
         .chars()
         .map(|c| {
-            let index = c.to_digit(10).expect("invalid palette index") as usize;
-            PALETTE[index - 1]
+            
+            if let Some(index) = CHARSET.iter().position(|&x| x == c as u8) {
+                PALETTE[index]
+            } else {
+                Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 }
+            }
         })
         .collect();
     Image {
