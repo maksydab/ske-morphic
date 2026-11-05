@@ -186,6 +186,13 @@ impl Nodeprops {
                             instance.h = i as f64;
                         }
                     }
+                    "r" =>{
+                        if let Valuer::Float(f)=valuer {
+                            instance.r = f;
+                        } else if let Valuer::Int(i) = valuer {
+                            instance.r = i as f64;
+                        }
+                    }
                     _ => {
                         if let Some(var) = instance.vars.get_mut(&propname) {
                             var.valuer = valuer;
