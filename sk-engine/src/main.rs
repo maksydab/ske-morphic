@@ -101,8 +101,10 @@ async fn main() {
     }));
 
     loop {
-        clear_background(DARKGRAY);
-        log_to_js("running");
+        let brightness = 0.05 + ((get_time() as f32 * 2.0).sin() + 1.0) * 0.05;
+
+        clear_background(Color::new(brightness, brightness, brightness, 1.0));
+        //log_to_js("running");
         //draw_text("waiting for game data...", 40.0, 100.0, 30.0, WHITE);
         ENGI.with(|engi| {
             if let Some(engi) = engi.borrow_mut().as_mut() {

@@ -1,6 +1,7 @@
 use crate::data::*;
 use crate::log_to_js;
 use crate::visual::*;
+use macroquad::color::RED;
 use macroquad::{
     color::Color,
     texture::Image,
@@ -686,7 +687,14 @@ impl Render for Engi {
 
         let offset_x = (screen_w - board_size) / 2.0;
         let offset_y = (screen_h - board_size) / 2.0;
-
+        let bg_col = self.gamed.data["bg-col"]
+            .as_u64()
+            .and_then(|i| PALETTE.get(i as usize))
+            .copied()
+            .unwrap_or(macroquad::prelude::BLACK);
+        const DRKENIN:f32=0.03;
+        let bg_col_darker = Color {r: (bg_col.r-DRKENIN).max(0.0), g: (bg_col.g-DRKENIN).max(0.0), b: (bg_col.b-DRKENIN).max(0.0),a:1.0};
+        macroquad::prelude::clear_background(bg_col);
         /*let message = format!(
             "message: {}\nentities: {}\nscene: {}",
             self.gamed.data["message"].as_str().unwrap_or(""),
@@ -703,6 +711,7 @@ impl Render for Engi {
                         let screen_w_px = ins.w as f32 * unit;
                         let screen_h_px = ins.h as f32 * unit;
                         //log_to_js(&("r: ".to_string()+&ins.r.to_string()));
+
                         macroquad::prelude::draw_texture_ex(
                             &renderer.img,
                             screen_x,
@@ -716,7 +725,6 @@ impl Render for Engi {
                             },
                         );
                     }
-
 
                     Props::Visualprop(_) => {}
                 }
@@ -732,5 +740,9 @@ impl Render for Engi {
                 macroquad::prelude::WHITE,
             );
         }*/
+        macroquad::prelude::draw_rectangle(offset_x, offset_y-screen_h, board_size, screen_h, bg_col_darker);
+        macroquad::prelude::draw_rectangle(offset_x-screen_w, offset_y, screen_w, board_size, bg_col_darker);
+        macroquad::prelude::draw_rectangle(offset_x+board_size, offset_y, screen_w, board_size, bg_col_darker);
+        macroquad::prelude::draw_rectangle(offset_x, offset_y+board_size, board_size, screen_h, bg_col_darker);
     }
 }
