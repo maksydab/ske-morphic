@@ -1,46 +1,66 @@
 const cnv = document.getElementById("programming-canvas");
 const ctx = cnv.getContext('2d');
-
+const catcolors = {
+  "control": "#23b353ff",
+  "getter": "#8e25b8ff",
+  "arithmetic": "rgba(46, 125, 199, 1)"
+}
 const node_blueprints = {
-  "onStart": { inputs: [], outputs: [{ id: "flowout", type: "flow" }] },
-  "onClick": { inputs: [], outputs: [{ id: "flowout", type: "flow" }] },
+  "onStart": { type: "control", inputs: [], outputs: [{ id: "flowout", type: "flow" }] },
+  "onClick": { type: "control", inputs: [], outputs: [{ id: "flowout", type: "flow" }] },
   "move": {
-    inputs: [{ id: "flowin", type: "flow" }, { id: "by", type: "data", default: 1.0 }],
+    type: "control",
+    inputs: [{ id: "flowin", type: "flow" }, { id: "by", type: "float", default: 1.0 }],
     outputs: [{ id: "flowout", type: "flow" }]
   },
   "if": {
-    inputs: [{ id: "flowin", type: "flow" }, { id: "condition", type: "data", default: true }],
+    type: "control",
+    inputs: [{ id: "flowin", type: "flow" }, { id: "condition", type: "bool", default: true }],
     outputs: [{ id: "true", type: "flow" }, { id: "false", type: "flow" }]
   },
   "add": {
-    inputs: [{ id: "a", type: "data", default: 1.0 }, { id: "b", type: "data", default: 1.0 }],
-    outputs: [{ id: "out", type: "data" }]
-  },
-  "getProp": {
-    inputs: [{ id: "n", type: "data", default: "x" }],
-    outputs: [{ id: "p", type: "data" }]
-  },
-  "changeProp": {
-    inputs: [{ id: "flowin", type: "flow" },{ id: "n", type: "data", default: "x" },{ id: "val", type: "data", default: "0" }],
-    outputs: [{ id: "out", type: "data" },{ id: "p", type: "data" }]
-  },
-  "value": {
-    inputs: [{ id: "val", type: "data", default: 0.0 }],
-    outputs: [{ id: "out", type: "data" }]
+    type: "arithmetic",
+    inputs: [{ id: "a", type: "float", default: 1.0 }, { id: "b", type: "float", default: 1.0 }],
+    outputs: [{ id: "out", type: "float" }]
   },
   "subtract": {
-    inputs: [{ id: "a", type: "data", default: 1.0 }, { id: "b", type: "data", default: 1.0 }],
-    outputs: [{ id: "out", type: "data" }]
+    type: "arithmetic",
+    inputs: [{ id: "a", type: "float", default: 1.0 }, { id: "b", type: "float", default: 1.0 }],
+    outputs: [{ id: "out", type: "float" }]
   },
   "mult": {
-    inputs: [{ id: "a", type: "data", default: 1.0 }, { id: "b", type: "data", default: 1.0 }],
-    outputs: [{ id: "out", type: "data" }]
+    type: "arithmetic",
+    inputs: [{ id: "a", type: "float", default: 1.0 }, { id: "b", type: "float", default: 1.0 }],
+    outputs: [{ id: "out", type: "float" }]
   },
   "div": {
-    inputs: [{ id: "a", type: "data", default: 1.0 }, { id: "b", type: "data", default: 1.0 }],
-    outputs: [{ id: "out", type: "data" }]
+    type: "arithmetic",
+    inputs: [{ id: "a", type: "float", default: 1.0 }, { id: "b", type: "float", default: 1.0 }],
+    outputs: [{ id: "out", type: "float" }]
   },
+  "getProp": {
+    type: "getter",
+    inputs: [{ id: "n", type: "string", default: "x" }],
+    outputs: [{ id: "p", type: "any" }]
+  },
+  "changeProp": {
+    type: "control",
+    inputs: [{ id: "flowin", type: "flow" }, { id: "n", type: "string", default: "x" }, { id: "val", type: "any", default: "0" }],
+    outputs: [{ id: "out", type: "any" }, { id: "p", type: "any" }]
+  }
 };
+const defaulticonSrc = "/assets/a/icons/nodes/node.png";
+const nodeIcons = {};
+Object.keys(node_blueprints).forEach(type => {
+  const img = new Image();
+  img.src = `/assets/a/icons/nodes/${type}.png`
+  img.onerror = () => {
+    if (!img.src.endsWith("node.png")) {
+      img.src = defaulticonSrc;
+    }
+  }
+  nodeIcons[type] = img;
+});
 
 let currententity = null;
 let graphnodes = [];
@@ -56,6 +76,18 @@ let camera = { x: 0, y: 0, z: 1 };
 let ispanning = false;
 let lastmouse = { x: 0, y: 0 };
 
+function getpincolor(type) {
+  if (type === "flow") return "#ffffff";
+  if (type === "int") return "#2e58ccff";
+  if (type === "float") return "#4be6b7ff";
+  if (type === "string") return "#eba016ff";
+  if (type === "bool") return "#69247aff";
+  if (type === "list") return "#211c33ff";
+  if (type === "any") return "#95a5a6";
+  return "#95a5a6";
+}
+
+
 function setupgraphui() {
   const panel = document.querySelector(".panel-vc .bg");
   if (!panel) return;
@@ -64,37 +96,134 @@ function setupgraphui() {
   panel.style.flexDirection = "column";
   panel.style.padding = "10px";
   panel.style.overflowY = "auto";
+  panel.innerHTML = "<h1>Entity</h1><div class='graph-entity-info' style='margin-bottom:15px;'>no entity selected</div>";
+  const addNodeBtn = document.createElement("button");
+  addNodeBtn.textContent = "+ add Node";
+  addNodeBtn.className = "btn";
+  addNodeBtn.style.marginTop = "5px";
+  addNodeBtn.onclick = () => {
+    if (!currententity) return alert("select an entity from the sidebar firtsly.");
+    openNodePopup();
+  };
+  panel.appendChild(addNodeBtn);
+  ensureNodePopupDOM();
+  window.onentityselected = (name) => {
+    loadentitygraph(name);
+  };
+  ctx.font = "400 16px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#ffffff";
+  if (window.selectedentity) {
+    loadentitygraph(window.selectedentity);
+  }
+}
+function ensureNodePopupDOM() {
+  if (document.getElementById('add-node-popup')) return;
 
-  panel.innerHTML = "<h1>Entity</h1><div class='graph-entity-info' style='margin-bottom:15px; color:#9bb2bc;'>no entity selected</div>";
+  const overlay = document.createElement("div");
+  overlay.id = "add-node-overlay";
+  overlay.className = "popup-overlay";
+  overlay.onclick = closeNodePopup;
 
-  const addpanel = document.createElement("div");
-  addpanel.style.display = "flex";
-  addpanel.style.flexDirection = "column";
-  addpanel.style.gap = "5px";
+  const popup = document.createElement("div");
+  popup.id = "add-node-popup";
+  popup.className = "popup-d paddin bg-sec";
+  popup.style.display = "flex";
+  popup.style.flexDirection = "column";
+  popup.style.background = "#1e1f22";
+  popup.style.color = "#fff";
+  popup.style.padding = "20px";
+  popup.style.boxSizing = "border-box";
 
-  Object.keys(node_blueprints).forEach(type => {
+  popup.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h1 style="margin:0; font-size:18px;">add Node</h1>
+        <button class="btn" onclick="closeNodePopup()" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;"><img class="pix-img" src="/assets/a/icons/x.png" style="width:24px;height:24px;"></button>
+    </div>
+    
+    <input type="text" id="node-search-input" class="inp" placeholder="search nodes..." style="" oninput="filterNodeList(this.value)"/>
+    <br>
+    <div id="node-list-container" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px;"></div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
+
+  if (!document.getElementById('popup-custom-styles')) {
+    const style = document.createElement("style");
+    style.id = 'popup-custom-styles';
+    style.textContent = `
+      .popup-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 999;
+      }
+      .popup-s {
+          position: fixed;
+          bottom: -1px;
+          left: 0;
+          width: 100%;
+          height: 60vh;
+          border-radius: 20px 20px 0 0;
+          z-index: 1000;
+          transform: translateY(100%);
+          transition: transform 0.3s ease;
+      }
+      .popup-s.active {
+          transform: translateY(0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+
+function openNodePopup() {
+  populateNodeList(node_blueprints);
+  document.getElementById('node-search-input').value = '';
+  document.getElementById('add-node-popup').classList.add('active');
+  document.getElementById('add-node-overlay').style.display = 'block';
+  setTimeout(() => document.getElementById('node-search-input').focus(), 50);
+}
+
+function closeNodePopup() {
+  document.getElementById('add-node-popup').classList.remove('active');
+  document.getElementById('add-node-overlay').style.display = 'none';
+}
+
+function populateNodeList(blueprints) {
+  const container = document.getElementById('node-list-container');
+  container.innerHTML = "";
+
+  Object.keys(blueprints).forEach(type => {
     const btn = document.createElement("button");
-    btn.textContent = "+ " + type;
-    btn.className = "btn";
+    btn.className = "btn node-item-btn";
+    btn.style.width = "100%";
+    btn.style.textAlign = "left";
+    btn.style.padding = "10px 14px";
+    btn.style.cursor = "pointer";
+    btn.textContent = type;
     btn.onclick = () => {
-      if (!currententity) return alert("select an entity from the sidebar firstly.");
+      if (!currententity) return;
       const centerx = camera.x + (cnv.clientWidth / 2) / camera.z;
       const centery = camera.y + (cnv.clientHeight / 2) / camera.z;
       addnode(type, centerx - 75, centery - 50);
       savegraphtoentity();
+      closeNodePopup();
     };
-    addpanel.appendChild(btn);
+    container.appendChild(btn);
   });
+}
 
-  panel.appendChild(addpanel);
-
-  window.onentityselected = (name) => {
-    loadentitygraph(name);
-  };
-
-  if (window.selectedentity) {
-    loadentitygraph(window.selectedentity);
-  }
+function filterNodeList(query) {
+  const filtered = {};
+  Object.keys(node_blueprints).forEach(type => {
+    if (type.toLowerCase().includes(query.toLowerCase())) {
+      filtered[type] = node_blueprints[type];
+    }
+  });
+  populateNodeList(filtered);
 }
 
 function screentoworld(x, y) {
@@ -111,7 +240,6 @@ function loadentitygraph(entityname) {
   nextnodeid = 1;
   selectednode = null;
   camera = { x: 0, y: 0, z: 1 };
-
   const infodiv = document.querySelector(".graph-entity-info");
   if (infodiv) {
     infodiv.textContent = entityname ? `selected: ${entityname}` : "no entity selected";
@@ -120,6 +248,20 @@ function loadentitygraph(entityname) {
   if (!entityname || !window.game || !window.game.entities[entityname]) return;
 
   const entity = window.game.entities[entityname];
+  if (infodiv) {
+    const previewb = document.createElement("button");
+    previewb.className="btn"
+    previewb.style="width:100%;height:auto; aspect-ratio:1/1;"
+    const spritecanvas = window.getentitysprite(entityname);
+
+    const preimg = document.createElement("img");
+    preimg.src = spritecanvas.toDataURL();
+    preimg.className = "pix-img"
+    preimg.style = "width:100%;height:auto; aspect-ratio:1/1;"
+    previewb.appendChild(preimg);
+    infodiv.appendChild(previewb)
+  }
+
   let visualcomp = entity.components.find(c => c.type === "visual");
   if (!visualcomp) {
     visualcomp = { type: "visual", p: { vars: {}, nodes: [] } };
@@ -141,7 +283,7 @@ function loadentitygraph(entityname) {
         if (val && typeof val === "object" && val.t) {
           const childnode = parsenode(val, posx - 180, posy + 60);
           if (childnode) {
-            const outpin = childnode.outputs.find(o => o.type === "data") || childnode.outputs[0];
+            const outpin = childnode.outputs.find(o => o.type !== "flow") || childnode.outputs[0];
             if (outpin) {
               connections.push({
                 fromNodeId: childnode.id,
@@ -195,7 +337,7 @@ function addnode(type, x, y, custominputs = {}) {
     type: type,
     x: x,
     y: y,
-    width: 150,
+    width: 155,
     height: Math.max(blueprint.inputs.length, blueprint.outputs.length) * 24 + 35,
     inputs: blueprint.inputs.map(i => ({ ...i, value: custominputs[i.id] ?? i.default })),
     outputs: blueprint.outputs.map(o => ({ ...o }))
@@ -273,8 +415,8 @@ function getpinpos(node, pinid, isoutput) {
 function getinputboxrect(node, pin) {
   const idx = node.inputs.findIndex(p => p.id === pin.id);
   const y = node.y + 35 + idx * 22 - 8;
-  const x = node.x + 45;
-  return { x, y, w: 55, h: 16 };
+  const x = node.x + 50;
+  return { x, y, w: 50, h: 16 };
 }
 
 cnv.addEventListener("mousedown", (e) => {
@@ -295,7 +437,7 @@ cnv.addEventListener("mousedown", (e) => {
 
   for (const node of graphnodes) {
     for (const pin of node.inputs) {
-      if (pin.type === "data" && !connections.some(c => c.toNodeId === node.id && c.toPinId === pin.id)) {
+      if (pin.type !== "flow" && !connections.some(c => c.toNodeId === node.id && c.toPinId === pin.id)) {
         const r = getinputboxrect(node, pin);
         if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
           const valstr = prompt(`enter value for ${pin.id}:`, pin.value ?? "");
@@ -375,7 +517,7 @@ window.addEventListener("mouseup", (e) => {
       pins.forEach(pin => {
         const pos = getpinpos(node, pin.id, !connectingpin.isOutput);
         if (Math.hypot(mousepos.x - pos.x, mousepos.y - pos.y) < 12 / camera.z) {
-          if (node.id !== connectingpin.nodeId && pin.type === connectingpin.pinType) {
+          if (node.id !== connectingpin.nodeId && (pin.type === connectingpin.pinType || pin.type === "any" || connectingpin.pinType === "any")) {
             const from = connectingpin.isOutput ? connectingpin : { nodeId: node.id, pinId: pin.id };
             const to = connectingpin.isOutput ? { nodeId: node.id, pinId: pin.id } : connectingpin;
 
@@ -448,49 +590,63 @@ function render() {
     const tonode = graphnodes.find(n => n.id === conn.toNodeId);
     if (!fromnode || !tonode) return;
 
+    const frompin = fromnode.outputs.find(p => p.id === conn.fromPinId);
+    const inpin = tonode.inputs.find(p => p.id === conn.toPinId);
+
     const p1 = getpinpos(fromnode, conn.fromPinId, true);
     const p2 = getpinpos(tonode, conn.toPinId, false);
 
+    const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+    gradient.addColorStop(0, getpincolor(frompin ? frompin.type : "flow"));
+    gradient.addColorStop(1, getpincolor(inpin ? inpin.type : "flow"));
+
     ctx.beginPath();
-    ctx.strokeStyle = conn.fromPinId.includes("flow") || conn.fromPinId === "true" || conn.fromPinId === "false" ? "#ffffff" : "#ff0000";
+    ctx.strokeStyle = gradient;
     ctx.lineWidth = 2;
     ctx.moveTo(p1.x, p1.y);
     ctx.bezierCurveTo(p1.x + 40, p1.y, p2.x - 40, p2.y, p2.x, p2.y);
     ctx.stroke();
   });
-
   if (connectingpin) {
     ctx.beginPath();
-    ctx.strokeStyle = connectingpin.pinType === "flow" ? "#ffffff" : "#ff0000";
+    ctx.strokeStyle = getpincolor(connectingpin.pinType);
     ctx.lineWidth = 2;
     ctx.moveTo(connectingpin.x, connectingpin.y);
     ctx.lineTo(mousepos.x, mousepos.y);
     ctx.stroke();
   }
 
+  ctx.imageSmoothingEnabled = false;
+
   graphnodes.forEach(node => {
-    ctx.fillStyle = "#000000";
-    ctx.strokeStyle = selectednode && selectednode.id === node.id ? "#ff0000" : "#ffffff";
+    ctx.fillStyle = selectednode && selectednode.id === node.id ? "#424242ff" : "#1f1f1fff";
     ctx.lineWidth = selectednode && selectednode.id === node.id ? 2 : 1;
     ctx.fillRect(node.x, node.y, node.width, node.height);
-    ctx.strokeRect(node.x, node.y, node.width, node.height);
+
+    ctx.fillStyle = catcolors[node_blueprints[node.type].type];
+    ctx.fillRect(node.x, node.y, node.width, 6);
+
+    const icon = nodeIcons[node.type];
+    if (icon && icon.complete && icon.naturalWidth !== 0) {
+      ctx.drawImage(icon, node.x + 8, node.y + 10, 20, 16);
+    }
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "12px sans-serif";
-    ctx.fillText(node.type, node.x + 8, node.y + 16);
+    ctx.font = "12px 'JetBrains Mono', monospace";
+    ctx.fillText(node.type, node.x + 32, node.y + 22);
 
     node.inputs.forEach(pin => {
       const pos = getpinpos(node, pin.id, false);
       ctx.beginPath();
-      ctx.fillStyle = pin.type === "flow" ? "#ffffff" : "#ff0000";
+      ctx.fillStyle = getpincolor(pin.type);
       ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "10px sans-serif";
+      ctx.font = "10px 'JetBrains Mono', monospace";
       ctx.fillText(pin.id, pos.x + 8, pos.y + 3);
 
-      if (pin.type === "data") {
+      if (pin.type !== "flow") {
         const hasconn = connections.some(c => c.toNodeId === node.id && c.toPinId === pin.id);
         if (!hasconn) {
           const r = getinputboxrect(node, pin);
@@ -499,7 +655,7 @@ function render() {
           ctx.strokeStyle = "#ffffff";
           ctx.strokeRect(r.x, r.y, r.w, r.h);
           ctx.fillStyle = "#ffffff";
-          ctx.font = "9px sans-serif";
+          ctx.font = "9px 'JetBrains Mono', monospace";
           ctx.fillText(pin.value !== undefined ? pin.value : "", r.x + 3, r.y + 12);
         }
       }
@@ -508,12 +664,12 @@ function render() {
     node.outputs.forEach(pin => {
       const pos = getpinpos(node, pin.id, true);
       ctx.beginPath();
-      ctx.fillStyle = pin.type === "flow" ? "#ffffff" : "#ff0000";
+      ctx.fillStyle = getpincolor(pin.type);
       ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "10px sans-serif";
+      ctx.font = "10px 'JetBrains Mono', monospace";
       ctx.fillText(pin.id, pos.x - 8 - ctx.measureText(pin.id).width, pos.y + 3);
     });
   });
@@ -541,3 +697,4 @@ resizecanvas();
 render();
 
 window.savegraphtoentity = savegraphtoentity;
+window.filterNodeList = filterNodeList;

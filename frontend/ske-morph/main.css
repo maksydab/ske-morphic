@@ -1,24 +1,12 @@
+@import url("themes.css");
 @import url("css/layout/main.css");
 @import url("css/cosmetic/main.css");
 @import url("css/additional/main.css");
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bitcount:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
-:root {
-  --main: #cdf3ca;
-  --trenary:#b7dfad;
-  --disabled: #5f665c;
-  --primary: #ffffff;
-  --secondary: #ffffff;
-  --accent: #7cf573;
-  --dark:rgb(42, 88, 57);
-  --bg: #111611;
-  --bg-secondary: #171f16;
-  --bg-accent:rgb(22, 49, 31);
-  --uni-padding:8px;
-  --roundness:2px;
-  --topbar-size:64px;
-}
+
+
 *{
   font-family: "JetBrains Mono", monospace;
   font-optical-sizing: auto;

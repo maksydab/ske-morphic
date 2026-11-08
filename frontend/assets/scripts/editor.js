@@ -30,7 +30,7 @@ d222d
               "to": {
                 "t": "changeProp",
                 "inputs": {
-                  "n":"x",
+                  "n": "x",
                   "val": {
                     "t": "add",
                     "inputs": {
@@ -40,7 +40,7 @@ d222d
                           "n": "x"
                         }
                       },
-                      "b": 0.5
+                      "b": 1.2
                     }
                   }
                 }
@@ -56,6 +56,7 @@ d222d
 const game = {
   "bg-col": 1,
   "v": 1,
+  "pallete":1,
   "entities": {},
   "scene": []
 }
@@ -69,7 +70,10 @@ let ispanning = false;
 let lastmouse = { x: 0, y: 0 };
 let selectedentity = null;
 let isloadingengine = false;
-
+let selectedinstances = [];
+let dragmode = null;
+let dragstart = null;
+let selectionstart = null;
 const palette = [
   "#141414", "#28292b", "#625565", "#a46868", "#b99a76", "#6a4460", "#7f708a", "#9bb2bc", "#c9e4d5", "#ffffff",
   "#721919", "#bf241b", "#ff492b", "#ff804a", "#ba0d22", "#ff2e2e", "#ff7023", "#ff9b19", "#ffc82f", "#7f213c",
@@ -82,6 +86,8 @@ const palette = [
 const spritecache = {};
 const charset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 
+
+//utils 
 function getentitysprite(entityname) {
   if (spritecache[entityname]) return spritecache[entityname];
   const entity = game.entities[entityname];
@@ -186,10 +192,36 @@ function refreshentitylist() {
 
   for (const name in game.entities) {
     const element = document.createElement("div");
-    element.textContent = name;
-    element.className = "entity-item";
+    //element.textContent = name;
+    element.className = "entity-item flex";
     element.draggable = true;
-
+    const ppp = document.createElement("p");
+    ppp.textContent=name;
+    ppp.style="margin-top:10px; margin-bottom:10px;"
+    element.appendChild(ppp)
+    const delbut = document.createElement("button")
+    delbut.className="btn ghost-btn"
+    delbut.onclick=()=>{
+      delete game.entities[name];
+      game.scene = game.scene.filter(item => item.t !== name);
+      refreshentitylist();
+    }
+    const delico = document.createElement("img")
+    delico.src="/assets/a/icons/trash.png"
+    delico.className="icon pix-img"
+    delbut.appendChild(delico)
+    element.appendChild(delbut)
+    const editbut = document.createElement("button")
+    editbut.className="btn ghost-btn"
+    editbut.onclick=()=>{
+      switcharoo(1);
+      selectentity(name);
+    }
+    const editico = document.createElement("img")
+    editico.src="/assets/a/icons/edit.png"
+    editico.className="icon pix-img"
+    editbut.appendChild(editico)
+    element.appendChild(editbut)
     if (selectedentity === name) {
       element.style.background = "#8b8b8b5e";
     }
@@ -206,8 +238,40 @@ function refreshentitylist() {
   }
 }
 
+
 function addentity(i) {
-  game.entities[i] = structuredClone(template_entities[i]);
+  let name = i;
+  let count = 2;
+  while (game.entities[name]) {
+    name = `${i} (${count})`;
+    count++;
+  }
+  const entity = structuredClone(template_entities[i]);
+  const renderer = entity.components.find(c => c.type === "renderer");
+  if (renderer) {
+    const img = renderer.p.img.replace(/\s/g, "");
+    const uniqueChars = [...new Set(img)];
+    const indexes = Array.from(
+      { length: palette.length },
+      (_, i) => i
+    );
+    for (let j = indexes.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [indexes[j], indexes[k]] = [indexes[k], indexes[j]];
+    }
+    const mapping = new Map();
+    uniqueChars.forEach((char, index) => {
+      mapping.set(char, charset[indexes[index]]);
+    });
+    renderer.p.img = [...img]
+      .map(char => mapping.get(char))
+      .join("");
+  }
+
+  game.entities[name] = entity;
+
+  delete spritecache[name];
+
   refreshentitylist();
 }
 
@@ -216,14 +280,10 @@ function rundisc() {
     window.savegraphtoentity();
   }
   switcharoo(2);
-
   if (isloadingengine) return;
   isloadingengine = true;
-
   const tryload = () => {
     const glcanvas = document.getElementById("glcanvas");
-
-
     if (window.SKEngine && window.SKEngine.is_ready()) {
       isloadingengine = false;
       try {
@@ -238,6 +298,171 @@ function rundisc() {
     }
   };
   tryload();
+}
+function mousepos(e) {
+  const rect = cnv.getBoundingClientRect();
+
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
+}
+function getlocalmouse(inst, mx, my) {
+  const center = getinstcenter(inst);
+  const angle = -(inst.p.r || 0) * Math.PI / 180;
+
+  const dx = mx - center.x;
+  const dy = my - center.y;
+
+  return {
+    x: dx * Math.cos(angle) - dy * Math.sin(angle),
+    y: dx * Math.sin(angle) + dy * Math.cos(angle)
+  };
+}
+
+function isrotationhandle(inst, mx, my) {
+  const local = getlocalmouse(inst, mx, my);
+  const h = inst.p.h * getviewport().unit * camera.z;
+
+  return (
+    Math.abs(local.x) < 12 &&
+    Math.abs(local.y + h / 2 + 25) < 12
+  );
+}
+function getinstcenter(inst) {
+  return worldtopixel(
+    inst.p.x + inst.p.w / 2,
+    inst.p.y + inst.p.h / 2
+  );
+}
+function getselectionhandle(inst, mx, my) {
+  const local = getlocalmouse(inst, mx, my);
+  const scale = getviewport().unit * camera.z;
+  const w = inst.p.w * scale;
+  const h = inst.p.h * scale;
+  const hit = 10;
+  if (
+    Math.abs(local.x) <= hit &&
+    Math.abs(local.y - (-h / 2 - 25)) <= hit
+  ) {
+    return "rotate";
+  }
+  const handles = [
+    { x: -1, y: -1 },
+    { x: 0, y: -1 },
+    { x: 1, y: -1 },
+    { x: -1, y: 0 },
+    { x: 1, y: 0 },
+    { x: -1, y: 1 },
+    { x: 0, y: 1 },
+    { x: 1, y: 1 }
+  ];
+
+  for (const handle of handles) {
+    const hx = handle.x * w / 2;
+    const hy = handle.y * h / 2;
+
+    if (
+      Math.abs(local.x - hx) <= hit &&
+      Math.abs(local.y - hy) <= hit
+    ) {
+      return handle;
+    }
+  }
+
+  return null;
+}
+
+
+// courtesy of our fav ram eating evil black box
+function hitinstance(inst, mx, my) {
+  const center = getinstcenter(inst);
+  const p = inst.p;
+  const angle = -(p.r || 0) * Math.PI / 180;
+  const dx = mx - center.x;
+  const dy = my - center.y;
+  const localx = dx * Math.cos(angle) - dy * Math.sin(angle);
+  const localy = dx * Math.sin(angle) + dy * Math.cos(angle);
+  const w = p.w * getviewport().unit * camera.z;
+  const h = p.h * getviewport().unit * camera.z;
+  return (
+    Math.abs(localx) <= w / 2 &&
+    Math.abs(localy) <= h / 2
+  );
+}
+function findinst(mx, my) {
+  for (let jj = game.scene.length - 1; jj >= 0; jj--) {
+    if (hitinstance(game.scene[jj], mx, my)) {
+      return jj;
+    }
+  }
+
+  return -1;
+}
+
+// for rendering in the play 
+function drawselection() {
+  if (selectedinstances.length === 0) return;
+
+  const index = selectedinstances[0];
+  const inst = game.scene[index];
+
+  if (!inst) return;
+
+  const p = inst.p;
+  const center = getinstcenter(inst);
+  const scale = getviewport().unit * camera.z;
+  const w = p.w * scale;
+  const h = p.h * scale;
+  ctx.save();
+  ctx.translate(center.x, center.y);
+  ctx.rotate((p.r || 0) * Math.PI / 180);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-w / 2, -h / 2, w, h);
+  const handleSize = 7;
+  ctx.fillStyle = "#707070";
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.5;
+  
+  ctx.beginPath();
+  ctx.moveTo(0, -h / 2);
+  ctx.lineTo(0, -h / 2 - 25);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, -h / 2 - 25, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#707070";
+  ctx.fill();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+
+  for (const x of [-1, 0, 1]) {
+    for (const y of [-1, 0, 1]) {
+      if (x === 0 && y === 0) continue;
+
+      const hx = x * w / 2;
+      const hy = y * h / 2;
+
+      ctx.fillRect(
+        hx - handleSize / 2,
+        hy - handleSize / 2,
+        handleSize,
+        handleSize
+      );
+
+      ctx.strokeRect(
+        hx - handleSize / 2,
+        hy - handleSize / 2,
+        handleSize,
+        handleSize
+      );
+    }
+  }
+
+
+  ctx.restore();
 }
 
 function renderr() {
@@ -277,16 +502,28 @@ function renderr() {
       const hpx = bottomright.y - topleft.y;
 
       const sprite = getentitysprite(inst.t);
+      //console.log(inst)
+
       if (sprite) {
+        ctx.save();
+
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(sprite, topleft.x, topleft.y, wpx, hpx);
+        const cx = topleft.x + wpx / 2;
+        const cy = topleft.y + hpx / 2;
+        ctx.translate(cx, cy);
+        ctx.rotate((inst.p.r || 0) * Math.PI / 180);
+        ctx.drawImage(sprite, -wpx / 2, -hpx / 2, wpx, hpx);
+
+        ctx.restore();
+
       } else {
         ctx.fillStyle = "#ff492b";
         ctx.fillRect(topleft.x, topleft.y, wpx, hpx);
       }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
   }
-
+  drawselection()
   requestAnimationFrame(renderr);
 }
 
@@ -314,26 +551,214 @@ cnv.addEventListener("mousedown", (e) => {
     lastmouse.x = e.clientX;
     lastmouse.y = e.clientY;
   }
+  // this is the part for the 8 point sleetcion tool
+  if (e.button === 0) {
+    const mouse = mousepos(e);
+    if (selectedinstances.length > 0) {
+      const selectedindex = selectedinstances[0];
+      const selectedinst = game.scene[selectedindex];
+
+      if (selectedinst) {
+        const handle = getselectionhandle(
+          selectedinst,
+          mouse.x,
+          mouse.y
+        );
+        if (handle === "rotate") {
+          const center = getinstcenter(selectedinst);
+
+          dragmode = "rotate";
+          dragstart = {
+            index: selectedindex,
+            startangle: Math.atan2(
+              mouse.y - center.y,
+              mouse.x - center.x
+            ),
+            rotation: selectedinst.p.r || 0
+          };
+
+          e.preventDefault();
+          return;
+        }
+
+        if (handle) {
+          const center = getinstcenter(selectedinst);
+          dragmode = "resize";
+          dragstart = {
+            index: selectedindex,
+            handle,
+            center,
+            x: selectedinst.p.x,
+            y: selectedinst.p.y,
+            w: selectedinst.p.w,
+            h: selectedinst.p.h,
+            rotation: selectedinst.p.r || 0
+          };
+
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+    const index = findinst(mouse.x, mouse.y);
+
+    if (index === -1) {
+      selectedinstances = [];
+      dragmode = null;
+      return;
+    }
+
+    if (e.shiftKey) {
+      if (!selectedinstances.includes(index)) {
+        selectedinstances.push(index);
+      }
+    } else if (!selectedinstances.includes(index)) {
+      selectedinstances = [index];
+    }
+
+    dragmode = "move";
+
+    dragstart = {
+      x: mouse.x,
+      y: mouse.y
+    };
+
+    selectionstart = selectedinstances.map(i => ({
+      index: i,
+      x: game.scene[i].p.x,
+      y: game.scene[i].p.y
+    }));
+
+    e.preventDefault();
+  }
 });
 
 window.addEventListener("mouseup", (e) => {
   if (e.button === 1) {
     ispanning = false;
   }
+  if (e.button === 0) {
+    dragmode = null;
+    dragstart = null;
+    selectionstart = null;
+  }
 });
 
-window.addEventListener("mousemove", (e) => {
-  if (!ispanning) return;
+cnv.addEventListener("mousemove", (e) => {
+  if (ispanning) {
+    const v = getviewport();
+    const dx = e.clientX - lastmouse.x;
+    const dy = e.clientY - lastmouse.y;
 
-  const v = getviewport();
-  const dx = e.clientX - lastmouse.x;
-  const dy = e.clientY - lastmouse.y;
+    camera.x -= dx / (v.unit * camera.z);
+    camera.y -= dy / (v.unit * camera.z);
 
-  camera.x -= dx / (v.unit * camera.z);
-  camera.y -= dy / (v.unit * camera.z);
+    lastmouse.x = e.clientX;
+    lastmouse.y = e.clientY;
+    return;
+  }
 
-  lastmouse.x = e.clientX;
-  lastmouse.y = e.clientY;
+  if (dragmode) {
+    const mouse = mousepos(e);
+
+    if (dragmode === "move") {
+      const startworld = pixeltoworld(
+        dragstart.x,
+        dragstart.y
+      );
+
+      const currentworld = pixeltoworld(
+        mouse.x,
+        mouse.y
+      );
+
+      const dx = currentworld.x - startworld.x;
+      const dy = currentworld.y - startworld.y;
+
+      for (const item of selectionstart) {
+        const inst = game.scene[item.index];
+
+        inst.p.x = item.x + dx;
+        inst.p.y = item.y + dy;
+      }
+    } else if (dragmode === "rotate") {
+      const inst = game.scene[dragstart.index];
+      const center = getinstcenter(inst);
+
+      const angle = Math.atan2(
+        mouse.y - center.y,
+        mouse.x - center.x
+      );
+
+      const delta = angle - dragstart.startangle;
+
+      inst.p.r = dragstart.rotation + delta * 180 / Math.PI;
+    } else if (dragmode === "resize") {
+      const inst = game.scene[dragstart.index];
+
+      const angle = -dragstart.rotation * Math.PI / 180;
+
+      const dx = mouse.x - dragstart.center.x;
+      const dy = mouse.y - dragstart.center.y;
+
+      const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+      const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+      const scale = getviewport().unit * camera.z;
+
+      let left = -dragstart.w / 2;
+      let right = dragstart.w / 2;
+      let top = -dragstart.h / 2;
+      let bottom = dragstart.h / 2;
+
+      const handle = dragstart.handle;
+
+      if (handle.x === -1) left = localX / scale;
+      if (handle.x === 1) right = localX / scale;
+      if (handle.y === -1) top = localY / scale;
+      if (handle.y === 1) bottom = localY / scale;
+
+      const minSize = 0.1;
+
+      if (right - left < minSize) {
+        if (handle.x === -1) left = right - minSize;
+        else right = left + minSize;
+      }
+
+      if (bottom - top < minSize) {
+        if (handle.y === -1) top = bottom - minSize;
+        else bottom = top + minSize;
+      }
+
+      const newWidth = right - left;
+      const newHeight = bottom - top;
+      const worldCenter = pixeltoworld(
+        dragstart.center.x,
+        dragstart.center.y
+      );
+
+      const localCenterX = (left + right) / 2;
+      const localCenterY = (top + bottom) / 2;
+
+      const rotation = dragstart.rotation * Math.PI / 180;
+
+      const offsetX =
+        localCenterX * Math.cos(rotation) -
+        localCenterY * Math.sin(rotation);
+
+      const offsetY =
+        localCenterX * Math.sin(rotation) +
+        localCenterY * Math.cos(rotation);
+
+      inst.p.w = newWidth;
+      inst.p.h = newHeight;
+
+      inst.p.x = worldCenter.x + offsetX - newWidth / 2;
+      inst.p.y = worldCenter.y + offsetY - newHeight / 2;
+    }
+
+    e.preventDefault();
+  }
 });
 
 cnv.addEventListener("auxclick", (e) => {
@@ -376,7 +801,8 @@ cnv.addEventListener("drop", (e) => {
       "x": worldpos.x - 0.5,
       "y": worldpos.y - 0.5,
       "w": 1,
-      "h": 1
+      "h": 1,
+      "r": 90,
     }
   });
 });
@@ -386,3 +812,4 @@ window.addentity = addentity;
 window.selectentity = selectentity;
 window.rundisc = rundisc;
 window.game = game;
+window.getentitysprite=getentitysprite;

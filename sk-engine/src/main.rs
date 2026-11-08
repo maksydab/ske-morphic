@@ -50,7 +50,7 @@ pub extern "C" fn load_json(ptr: *const u8, size: usize) -> bool {
     let data: Value = match serde_json::from_slice(bytes) {
         Ok(data) => data,
         Err(e) => {
-            log_to_js(&format!("JSON Parse Error: {}", e));
+            log_to_js(&format!("JSON parse error: {}", e));
             return false;
         }
     };
@@ -67,11 +67,11 @@ pub extern "C" fn load_json(ptr: *const u8, size: usize) -> bool {
         Ok(_) => true,
         Err(err) => {
             if let Some(s) = err.downcast_ref::<String>() {
-                log_to_js(&format!("Engine Panic: {}", s));
+                log_to_js(&format!("engine panic: {}", s));
             } else if let Some(s) = err.downcast_ref::<&str>() {
-                log_to_js(&format!("Engine Panic: {}", s));
+                log_to_js(&format!("engine panic: {}", s));
             } else {
-                log_to_js("Engine Panic: Unknown error");
+                log_to_js("engine panic: Unknown error");
             }
             false
         }

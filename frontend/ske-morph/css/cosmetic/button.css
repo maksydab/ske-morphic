@@ -25,3 +25,11 @@
   background-color: var(--bg-secondary) ;
   color: var(--disabled);
 }
+.ghost-btn{
+  background-color: transparent !important;
+  color:var(--main);
+  padding:var(--uni-padding);
+  border: none !important;
+  border-radius: var(--roundness);
+  transition:ease 0.1s ;
+}

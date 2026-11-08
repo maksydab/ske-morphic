@@ -65,8 +65,6 @@ body {
   image-rendering: pixelated;
 }
 
-
-
 .col {
   flex-direction: column;
 }
@@ -77,4 +75,8 @@ body {
 
 .view-y {
   height: 100vh;
+}
+.icon{
+  width:16px;
+  height:16px;
 }

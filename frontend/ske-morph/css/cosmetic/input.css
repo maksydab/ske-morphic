@@ -9,6 +9,7 @@
 .inp:-webkit-autofill:hover, 
 .inp:-webkit-autofill:focus, 
 .inp:-webkit-autofill:active{
+  
   -webkit-text-fill-color: var(--trenary);
   -webkit-box-shadow: 0 0 0 30px var(--trenary) inset !important;
   -webkit-text-fill-color: var(--bg) !important;

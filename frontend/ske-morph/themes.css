@@ -1,0 +1,123 @@
+:root,
+[data-theme="green"] {
+  --main: #cdf3ca;
+  --trenary: #b7dfad;
+  --disabled: #5f665c;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #7cf573;
+  --dark: rgb(42, 88, 57);
+  --bg: #111611;
+  --bg-secondary: #171f16;
+  --bg-accent: rgb(22, 49, 31);
+}
+
+[data-theme="grey"] {
+  --main: #dedede;
+  --trenary: #b8b8b8;
+  --disabled: #666666;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #a0a0a0;
+  --dark: #414141;
+  --bg: #111111;
+  --bg-secondary: #1b1b1b;
+  --bg-accent: #262626;
+}
+
+[data-theme="blue"] {
+  --main: #c5e1ff;
+  --trenary: #91bde8;
+  --disabled: #596b7e;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #60aaff;
+  --dark: #294c70;
+  --bg: #10161e;
+  --bg-secondary: #161f2b;
+  --bg-accent: #1d3047;
+}
+
+[data-theme="purple"] {
+  --main: #e1d0ff;
+  --trenary: #bda2e8;
+  --disabled: #70617f;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #b18aff;
+  --dark: #523c70;
+  --bg: #17121e;
+  --bg-secondary: #21192b;
+  --bg-accent: #302143;
+}
+
+[data-theme="red"] {
+  --main: #ffd0d0;
+  --trenary: #e8a0a0;
+  --disabled: #806060;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #ff7777;
+  --dark: #703535;
+  --bg: #1a1111;
+  --bg-secondary: #251717;
+  --bg-accent: #3d2020;
+}
+
+[data-theme="orange"] {
+  --main: #ffe0c2;
+  --trenary: #e8b98e;
+  --disabled: #806b55;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #ffa64d;
+  --dark: #704b28;
+  --bg: #1a1510;
+  --bg-secondary: #251d15;
+  --bg-accent: #3d2b1b;
+}
+
+[data-theme="pink"] {
+  --main: #ffd6e8;
+  --trenary: #e8a9c5;
+  --disabled: #806273;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #ff82b8;
+  --dark: #703d55;
+  --bg: #1a1117;
+  --bg-secondary: #251822;
+  --bg-accent: #3d2232;
+}
+
+[data-theme="cyan"] {
+  --main: #c8f5f5;
+  --trenary: #91d6d6;
+  --disabled: #587878;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #5ce0e0;
+  --dark: #285e5e;
+  --bg: #101818;
+  --bg-secondary: #162424;
+  --bg-accent: #1d3838;
+}
+
+[data-theme="amber"] {
+  --main: #ffedbd;
+  --trenary: #e8d08e;
+  --disabled: #80734e;
+  --primary: #ffffff;
+  --secondary: #ffffff;
+  --accent: #ffca55;
+  --dark: #705a28;
+  --bg: #19160f;
+  --bg-secondary: #242014;
+  --bg-accent: #3b321c;
+}
+
+:root {
+  --uni-padding: 8px;
+  --roundness: 2px;
+  --topbar-size: 64px;
+}

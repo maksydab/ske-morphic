@@ -598,8 +598,11 @@ pub fn strtoimg(img: &str, w: i64, h: i64) -> Image {
             } else {
                 Color {
                     r: 0.0,
+
                     g: 0.0,
+                    
                     b: 0.0,
+                    
                     a: 0.0,
                 }
             }
@@ -710,8 +713,9 @@ impl Render for Engi {
                         let screen_y = offset_y + (ins.y as f32 * unit);
                         let screen_w_px = ins.w as f32 * unit;
                         let screen_h_px = ins.h as f32 * unit;
-                        //log_to_js(&("r: ".to_string()+&ins.r.to_string()));
-
+                        
+                        log_to_js(&("r: ".to_string()+&ins.r.to_string()));
+                        log_to_js(&("r: ".to_string()+&ins.r.to_string()));
                         macroquad::prelude::draw_texture_ex(
                             &renderer.img,
                             screen_x,

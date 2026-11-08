@@ -72,6 +72,15 @@ pub struct Nmult {}
 
 #[derive(Clone, Debug)]
 pub struct Ndiv {}
+#[derive(Clone, Debug)]
+pub struct Nequal {}
+#[derive(Clone, Debug)]
+pub struct NgreaterThan {}
+#[derive(Clone, Debug)]
+pub struct NlessThan {}
+#[derive(Clone, Debug)]
+pub struct Nnot {}
+
 
 #[derive(Clone, Debug)]
 pub struct NgetProp {}
@@ -93,6 +102,7 @@ pub enum Nodeprops {
     NchangeProp(NchangeProp),
 }
 
+
 impl Nodeprops {
     pub fn execute(&self, instance: &mut Instance, allnodes: &[Noder]) -> Vec<usize> {
         let currentnode = allnodes
@@ -110,7 +120,7 @@ impl Nodeprops {
                 (Nodeprops::NchangeProp(_), Nodeprops::NchangeProp(_)) => true,
                 _ => false,
             })
-            .expect("node context error");
+            .expect("node context error.");
         match self {
             Nodeprops::NonStart(_) => {
                 log_to_js("start node triggered");
@@ -480,7 +490,7 @@ fn getnodeblueprint(tstr: &str) -> (i64, Nodeprops, Vec<Pin>, Vec<Pin>) {
         _ => panic!("unknown node type in blueprint: '{}'", tstr),
     }
 }
-
+// this is used to parse the json given to sie engine
 pub fn parse_json_node(v: &serde_json::Value, nodes: &mut Vec<Noder>) -> Option<usize> {
     let tstr = v.get("t")?.as_str()?;
     let nodeid = nodes.len();
@@ -562,7 +572,7 @@ pub fn parse_json_node(v: &serde_json::Value, nodes: &mut Vec<Noder>) -> Option<
 
     Some(nodeid)
 }
-
+// this fucntion 
 pub fn evaluatepinvaluer(
     allnodes: &[Noder],
     node: &Noder,
