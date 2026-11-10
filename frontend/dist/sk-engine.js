@@ -1,46 +1,61 @@
+
 window.SKEngine = (() => {
     let ready = false;
 
-    miniquad_add_plugin({
-        register_plugin: function (importobject) {
-            importobject.env.js_console_log = function (ptr, len) {
-                const memory = new Uint8Array(wasm_memory.buffer);
-                const bytes = memory.subarray(ptr, ptr + len);
-                const text = new TextDecoder().decode(bytes);
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
 
-                console.log("[sk engine]:", text);
-            };
-        },
+            script.src = new URL(src, document.currentScript?.src || location.href).href;
+            script.async = true;
 
-        on_init: function () {
-            ready = true;
-            console.log("[sk engine]: engine ready!");
+            script.onload = resolve;
+            script.onerror = () => reject(
+                new Error("Failed to fetch: " + script.src)
+            );
+
+            document.head.appendChild(script);
+        });
+    }
+
+    async function init() {
+        await loadScript("/dist/mg.js");
+
+        if (typeof miniquad_add_plugin !== "function") {
+            throw new Error("mg.js did not expose miniquad_add_plugin");
         }
-    });
 
-    function is_ready() {
-        return ready;
+        miniquad_add_plugin({
+            register_plugin(importobject) {
+                importobject.env.js_console_log = function (ptr, len) {
+                    const memory = new Uint8Array(wasm_memory.buffer);
+                    const bytes = memory.subarray(ptr, ptr + len);
+
+                    console.log(
+                        "[sk engine]:",
+                        new TextDecoder().decode(bytes)
+                    );
+                };
+            },
+
+            on_init() {
+                ready = true;
+                console.log("[sk engine]: engine ready!");
+            }
+        });
+
+        load("/dist/sk-engine.wasm");
     }
 
     function load_bytes(bytes) {
-        if (!ready) {
-            throw new Error("engine is not ready");
-        }
+        if (!ready) throw new Error("engine is not ready");
 
         const ptr = wasm_exports.alloc_json(bytes.length);
-
-        if (ptr === 0) {
-            throw new Error("rust allocation failed");
-        }
+        if (!ptr) throw new Error("rust allocation failed");
 
         try {
-            const memory = new Uint8Array(
-                wasm_memory.buffer,
-                ptr,
-                bytes.length
-            );
-
-            memory.set(bytes);
+            new Uint8Array(wasm_memory.buffer, ptr, bytes.length)
+                .set(bytes);
 
             return wasm_exports.load_json(ptr, bytes.length) !== 0;
         } finally {
@@ -51,27 +66,24 @@ window.SKEngine = (() => {
     function load_json(text, canvasid = "glcanvas") {
         JSON.parse(text);
 
-        const targetcanvas = document.getElementById(canvasid);
-        if (targetcanvas) {
-            targetcanvas.focus();
-        }
+        document.getElementById(canvasid)?.focus();
 
-        const bytes = new TextEncoder().encode(text);
-        return load_bytes(bytes);
+        return load_bytes(new TextEncoder().encode(text));
     }
 
-    async function load_file(file, canvasid = "glcanvas") {
-        const buffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        return load_bytes(bytes);
+    async function load_file(file) {
+        return load_bytes(
+            new Uint8Array(await file.arrayBuffer())
+        );
     }
 
     return {
-        is_ready,
+        init,
+        is_ready: () => ready,
         load_bytes,
         load_json,
         load_file
     };
 })();
 
-load("/dist/sk-engine.wasm");
+SKEngine.init().catch(console.error);
