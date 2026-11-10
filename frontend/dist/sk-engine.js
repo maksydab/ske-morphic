@@ -155,7 +155,7 @@ window.SKEngine = (() => {
             if (typeof miniquad_add_plugin !== "function") {
                 handleError(
                     new Error("mg.js did not expose miniquad_add_plugin"),
-                    "initializing Miniquad"
+                    "initializing miniquad"
                 );
             }
 
